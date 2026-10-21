@@ -1,0 +1,1488 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Minha Agenda</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237c3aed'/%3E%3Crect x='14' y='18' width='36' height='32' rx='5' fill='white'/%3E%3Crect x='14' y='18' width='36' height='9' rx='4' fill='%23f39200'/%3E%3Ccircle cx='24' cy='37' r='3' fill='%237c3aed'/%3E%3Ccircle cx='34' cy='37' r='3' fill='%231b9ad6'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f5f6fa; --card:#ffffff; --card2:#f0f1f6; --txt:#1c1d24; --txt2:#5d6070; --linha:#e3e5ee;
+  --pessoal:#7c3aed; --pessoal-claro:#ede6fd; --trabalho:#1b9ad6; --trabalho-claro:#dff1fb;
+  --tudo:#f39200; --tudo-claro:#fdf0dc;
+  --verm:#dc2626; --verm-claro:#fde8e8; --verde:#16a34a; --verde-claro:#e3f6e9; --amar:#d97706; --amar-claro:#fdf3dc;
+  --acento:var(--pessoal); --acento-claro:var(--pessoal-claro);
+  --raio:14px; --sombra:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  color-scheme:light;
+}
+:root[data-tema="escuro"]{
+  --bg:#111218; --card:#1b1c24; --card2:#24252f; --txt:#ecedf3; --txt2:#a0a3b4; --linha:#30323e;
+  --pessoal:#a78bfa; --pessoal-claro:#2c2442; --trabalho:#4cb8ec; --trabalho-claro:#16303f;
+  --tudo:#f7a733; --tudo-claro:#3a2a12;
+  --verm:#f87171; --verm-claro:#3d1d1f; --verde:#4ade80; --verde-claro:#163222; --amar:#fbbf24; --amar-claro:#3a2e12;
+  --sombra:0 1px 2px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+body[data-aba="trabalho"]{--acento:var(--trabalho);--acento-claro:var(--trabalho-claro)}
+body[data-aba="tudo"]{--acento:var(--tudo);--acento-claro:var(--tudo-claro)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--acento)}
+.oculto{display:none!important}
+
+/* ---------- Login ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-box{background:var(--card);border-radius:20px;box-shadow:var(--sombra);padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.login-box h1{font-size:1.5rem;margin:12px 0 4px}
+.login-box p{color:var(--txt2);margin:0 0 20px}
+.logo{width:64px;height:64px;margin:0 auto;border-radius:16px;background:linear-gradient(135deg,var(--pessoal),var(--trabalho));display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:700}
+
+/* ---------- Layout ---------- */
+header.topo{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--linha);padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+header.topo h1{font-size:1.1rem;margin:0;font-weight:700;white-space:nowrap}
+.abas{display:flex;background:var(--card2);border-radius:999px;padding:4px;gap:2px;margin-left:auto}
+.abas button{border:0;background:transparent;padding:8px 14px;border-radius:999px;font-weight:600;font-size:.9rem;cursor:pointer;color:var(--txt2);min-height:38px}
+.abas button.ativo[data-v="pessoal"]{background:var(--pessoal);color:#fff}
+.abas button.ativo[data-v="trabalho"]{background:var(--trabalho);color:#fff}
+.abas button.ativo[data-v="tudo"]{background:var(--tudo);color:#fff}
+.icone-btn{border:0;background:var(--card2);width:40px;height:40px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}
+main{max-width:980px;margin:0 auto;padding:16px 16px 110px}
+nav.menu{position:fixed;bottom:0;left:0;right:0;z-index:20;background:var(--card);border-top:1px solid var(--linha);display:flex;justify-content:space-around;padding:6px 4px;padding-bottom:max(6px,env(safe-area-inset-bottom))}
+nav.menu button{border:0;background:transparent;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--txt2);padding:6px 0;cursor:pointer;min-height:52px;border-radius:12px}
+nav.menu button svg{width:24px;height:24px}
+nav.menu button.ativo{color:var(--acento);font-weight:700}
+.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:21;width:60px;height:60px;border-radius:50%;border:0;background:var(--acento);color:#fff;font-size:32px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;line-height:1}
+@media (min-width:900px){
+  nav.menu{top:61px;bottom:0;right:auto;width:200px;flex-direction:column;justify-content:flex-start;border-top:0;border-right:1px solid var(--linha);padding:12px}
+  nav.menu button{flex:none;flex-direction:row;gap:10px;font-size:.95rem;padding:10px 12px;justify-content:flex-start;min-height:44px}
+  nav.menu button.ativo{background:var(--acento-claro)}
+  main{margin-left:200px;padding:24px 28px 60px;max-width:1100px}
+  .fab{bottom:28px;right:28px}
+}
+
+/* ---------- Componentes ---------- */
+h2.tit{font-size:1.35rem;margin:4px 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h2.tit .sub{font-size:.9rem;font-weight:500;color:var(--txt2)}
+.card{background:var(--card);border-radius:var(--raio);box-shadow:var(--sombra);padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.card h3 .cont{margin-left:auto;font-size:.8rem;background:var(--card2);color:var(--txt2);padding:2px 9px;border-radius:999px;font-weight:600}
+.secao-atrasado{border-left:5px solid var(--verm)}
+.secao-atrasado h3{color:var(--verm)}
+.secao-hoje{border-left:5px solid var(--acento)}
+.secao-aviso{border-left:5px solid var(--amar)}
+.vazio{color:var(--txt2);font-size:.92rem;padding:6px 2px}
+.grade2{display:grid;gap:14px}
+@media (min-width:900px){.grade2{grid-template-columns:1fr 1fr}}
+
+.btn{border:0;border-radius:12px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:44px;background:var(--card2);display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:var(--txt)}
+.btn.pri{background:var(--acento);color:#fff}
+.btn.perigo{background:var(--verm-claro);color:var(--verm)}
+.btn.ok{background:var(--verde-claro);color:var(--verde)}
+.btn.wa{background:#25d366;color:#fff}
+.btn.peq{min-height:36px;padding:6px 12px;font-size:.88rem;border-radius:10px}
+.btn.bloco{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+.linha-btns{display:flex;flex-wrap:wrap;gap:8px}
+.linha-btns.col{flex-direction:column}
+
+/* Itens */
+.item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--linha)}
+.item:last-child{border-bottom:0}
+.item .chk{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--txt2);background:transparent;cursor:pointer;padding:0}
+.item.ab-pessoal .chk{border-color:var(--pessoal)}
+.item.ab-trabalho .chk{border-color:var(--trabalho)}
+.item.feito .chk{background:var(--verde);border-color:var(--verde)}
+.item.feito .chk::after{content:"✓";color:#fff;font-weight:700}
+.item.feito .item-tit{text-decoration:line-through;color:var(--txt2)}
+.item-corpo{flex:1;min-width:0;cursor:pointer}
+.item-tit{font-weight:600;overflow-wrap:anywhere}
+.item-meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.8rem;color:var(--txt2);margin-top:2px}
+.item-meta .atras{color:var(--verm);font-weight:700}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--card2);color:var(--txt2)}
+.tag.pessoal{background:var(--pessoal-claro);color:var(--pessoal)}
+.tag.trabalho{background:var(--trabalho-claro);color:var(--trabalho)}
+.pd{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.pd-alta{background:var(--verm)} .pd-media{background:var(--amar)} .pd-baixa{background:var(--verde)}
+.item .mini-wa{flex:none;background:#25d366;color:#fff;border-radius:10px;padding:8px 10px;font-size:.8rem;font-weight:700;text-decoration:none}
+.grupo-dia{font-size:.8rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.03em;margin:12px 0 2px}
+.grupo-dia:first-child{margin-top:0}
+
+/* Barra de horas */
+.barra-wrap{margin:6px 0 2px}
+.barra{height:12px;border-radius:999px;background:var(--card2);overflow:hidden;display:flex;position:relative}
+.barra span{height:100%}
+.barra .seg-pessoal{background:var(--pessoal)} .barra .seg-trabalho{background:var(--trabalho)}
+.barra.cheia{outline:2px solid var(--verm)}
+.barra .marca{position:absolute;top:0;bottom:0;width:2px;background:var(--verm)}
+.barra-txt{font-size:.78rem;color:var(--txt2);display:flex;justify-content:space-between;gap:6px;margin-top:3px}
+.barra-txt .over{color:var(--verm);font-weight:700}
+.dia-plan{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--linha);cursor:pointer}
+.dia-plan:last-child{border-bottom:0}
+.dia-plan .dn{font-weight:700;font-size:.9rem}
+.dia-plan .dn small{display:block;color:var(--txt2);font-weight:500}
+.dia-plan.hoje .dn{color:var(--acento)}
+.dia-plan.excedido .dn{color:var(--verm)}
+
+/* Calendário */
+.cal-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.cal-top .mes{font-weight:700;font-size:1.1rem;text-transform:capitalize;flex:1;text-align:center}
+.seg{display:flex;background:var(--card2);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.88rem;color:var(--txt2);min-height:36px}
+.seg button.ativo{background:var(--card);color:var(--txt);box-shadow:var(--sombra)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .cab{text-align:center;font-size:.75rem;color:var(--txt2);font-weight:700;padding:4px 0}
+.cal .d{background:var(--card);border-radius:10px;min-height:56px;padding:5px 4px;cursor:pointer;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px}
+.cal .d.fora{opacity:.4}
+.cal .d.hoje .n{background:var(--acento);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.cal .d.sel{border-color:var(--acento)}
+.cal .d.cheio{background:var(--verm-claro)}
+.cal .n{font-weight:600;font-size:.9rem;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.bolinhas{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:44px}
+.bol{width:7px;height:7px;border-radius:50%}
+.bol.pessoal{background:var(--pessoal)} .bol.trabalho{background:var(--trabalho)} .bol.gasto{background:var(--tudo)} .bol.atr{background:var(--verm)}
+.semana{display:grid;gap:8px}
+@media (min-width:900px){.semana{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.semana .col{background:var(--card);border-radius:12px;padding:8px;box-shadow:var(--sombra);min-height:80px;cursor:pointer}
+.semana .col.hoje{outline:2px solid var(--acento)}
+.semana .col .cn{font-weight:700;font-size:.85rem;margin-bottom:4px}
+.semana .mini{font-size:.8rem;padding:3px 6px;border-radius:6px;margin-top:3px;background:var(--card2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-left:3px solid var(--txt2)}
+.semana .mini.pessoal{border-left-color:var(--pessoal)} .semana .mini.trabalho{border-left-color:var(--trabalho)} .semana .mini.feito{text-decoration:line-through;opacity:.6}
+
+/* Modal */
+#modal{position:fixed;inset:0;z-index:50;background:rgba(10,10,20,.5);display:flex;align-items:flex-end;justify-content:center}
+#modal .folha{background:var(--card);width:100%;max-width:620px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:sobe .18s ease-out}
+@media (min-width:700px){#modal{align-items:center}#modal .folha{border-radius:20px}}
+@keyframes sobe{from{transform:translateY(30px);opacity:.5}to{transform:none;opacity:1}}
+.folha-cab{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.folha-cab h2{margin:0;font-size:1.2rem;flex:1}
+label.campo{display:block;margin-bottom:12px;font-size:.88rem;font-weight:600;color:var(--txt2)}
+label.campo input,label.campo select,label.campo textarea,.inp{display:block;width:100%;margin-top:4px;padding:11px 12px;border-radius:12px;border:1px solid var(--linha);background:var(--bg);color:var(--txt);font-weight:400;font-size:1rem;min-height:46px}
+textarea{resize:vertical;min-height:90px}
+.campos2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chips input{display:none}
+.chips label{padding:8px 13px;border-radius:999px;background:var(--card2);cursor:pointer;font-weight:600;font-size:.88rem;color:var(--txt);min-height:38px;display:inline-flex;align-items:center}
+.chips input:checked+span{color:#fff}
+.chips label:has(input:checked){background:var(--acento);color:#fff}
+.check-linha{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--linha)}
+.check-linha input[type=checkbox]{width:22px;height:22px;flex:none}
+.check-linha .txt{flex:1}
+.check-linha.ok .txt{text-decoration:line-through;color:var(--txt2)}
+.det-linha{display:flex;gap:8px;font-size:.92rem;padding:4px 0;color:var(--txt2)}
+.det-linha b{color:var(--txt);font-weight:600}
+.alerta{border-radius:12px;padding:12px;margin:10px 0;font-size:.92rem}
+.alerta.verm{background:var(--verm-claro);color:var(--verm)}
+.alerta.amar{background:var(--amar-claro);color:var(--amar)}
+.alerta.verde{background:var(--verde-claro);color:var(--verde)}
+.alerta.info{background:var(--acento-claro);color:var(--txt)}
+.sug{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--linha);border-radius:12px;margin-bottom:8px}
+.sug .info{flex:1}
+.sug .info small{display:block;color:var(--txt2)}
+table.tab{width:100%;border-collapse:collapse;font-size:.9rem}
+table.tab td,table.tab th{padding:7px 4px;border-bottom:1px solid var(--linha);text-align:left}
+table.tab th{color:var(--txt2);font-size:.78rem;text-transform:uppercase}
+.num{text-align:right!important;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media (min-width:700px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--card);border-radius:var(--raio);padding:12px;box-shadow:var(--sombra)}
+.kpi .v{font-size:1.5rem;font-weight:800}
+.kpi .l{font-size:.8rem;color:var(--txt2)}
+.meses{display:flex;align-items:flex-end;gap:6px;height:150px;padding-top:10px}
+.meses .m{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer}
+.meses .m .b{width:100%;background:var(--acento-claro);border-radius:6px 6px 0 0;min-height:3px}
+.meses .m.pesado .b{background:var(--tudo)}
+.meses .m .r{font-size:.66rem;color:var(--txt2);margin-top:4px;text-transform:capitalize}
+.meses .m .val{font-size:.62rem;color:var(--txt2);margin-bottom:2px;white-space:nowrap}
+.busca{margin-bottom:12px}
+.lista-sel{display:flex;flex-direction:column}
+.lista-sel .linha{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--linha);cursor:pointer}
+.lista-sel .linha:last-child{border-bottom:0}
+.lista-sel .linha .info{flex:1;min-width:0}
+.lista-sel .linha small{color:var(--txt2);display:block}
+.nota-txt{white-space:pre-wrap;color:var(--txt2);font-size:.9rem;margin-top:3px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.assunto-linha{display:grid;grid-template-columns:1fr 90px 44px;gap:8px;margin-bottom:8px}
+#toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:12px;z-index:60;font-size:.92rem;box-shadow:0 6px 18px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+#sync{font-size:.75rem;color:var(--txt2)}
+.mais-grade{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:700px){.mais-grade{grid-template-columns:repeat(3,1fr)}}
+.mais-grade button{background:var(--card);border:0;border-radius:var(--raio);box-shadow:var(--sombra);padding:18px 12px;cursor:pointer;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:96px}
+.mais-grade button span{font-size:1.6rem}
+.mais-grade button small{font-weight:500;color:var(--txt2);font-size:.78rem}
+@media (max-width:420px){
+  header.topo h1{display:none}
+  .abas{margin-left:0}
+  .abas button{padding:8px 11px}
+}
+</style>
+</head>
+<body data-aba="pessoal">
+
+<!-- ===================== TELA DE ACESSO ===================== -->
+<section id="login">
+  <div class="login-box">
+    <div class="logo">✓</div>
+    <h1>Minha Agenda</h1>
+    <p id="login-msg">Digite seu código de acesso</p>
+    <form id="form-login" autocomplete="off">
+      <input class="inp" id="inp-codigo" type="password" inputmode="text" autocomplete="current-password" placeholder="Código de acesso" required style="text-align:center;font-size:1.15rem;letter-spacing:.1em">
+      <input class="inp oculto" id="inp-codigo2" type="password" placeholder="Repita o código" style="text-align:center;margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;justify-content:center;margin:14px 0;color:var(--txt2);font-size:.9rem">
+        <input type="checkbox" id="inp-lembrar" checked style="width:20px;height:20px"> Lembrar neste aparelho
+      </label>
+      <button class="btn pri bloco" id="btn-entrar" type="submit">Entrar</button>
+    </form>
+    <p id="login-erro" style="color:var(--verm);margin:14px 0 0;min-height:1.4em"></p>
+  </div>
+</section>
+
+<!-- ===================== APLICATIVO ===================== -->
+<div id="app" class="oculto">
+  <header class="topo">
+    <h1>Minha Agenda</h1>
+    <div class="abas" id="abas">
+      <button data-a="aba" data-v="pessoal">Pessoal</button>
+      <button data-a="aba" data-v="trabalho">Trabalho</button>
+      <button data-a="aba" data-v="tudo">Tudo</button>
+    </div>
+    <button class="icone-btn" data-a="tema" title="Modo claro/escuro" aria-label="Modo claro/escuro"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  </header>
+  <nav class="menu" id="menu">
+    <button data-a="ir" data-v="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Avisos</button>
+    <button data-a="ir" data-v="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Agenda</button>
+    <button data-a="ir" data-v="planejador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Planejar</button>
+    <button data-a="ir" data-v="notas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h10l4 4v14H5z"/><path d="M9 11h6M9 15h6"/></svg>Notas</button>
+    <button data-a="ir" data-v="mais"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Mais</button>
+  </nav>
+  <main id="main"></main>
+  <button class="fab" data-a="novo" aria-label="Adicionar">+</button>
+</div>
+
+<div id="modal" class="oculto"><div class="folha" id="folha"></div></div>
+<div id="toast" class="oculto"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — só estes dois valores ligam o site ao seu Supabase.
+   A chave "publishable" é PÚBLICA por natureza: ela sozinha não lê
+   nem grava nada. Todo acesso exige o código, que fica só no banco
+   (guardado como hash bcrypt) e nunca aparece neste arquivo.
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: 'https://gczedrtmorahvtfsrrki.supabase.co',
+  SUPABASE_KEY: 'sb_publishable_8DavIjm6E2egTz0qtxuQRQ_f-WFPOXo'
+};
+
+/* ===================== Utilidades ===================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const pad = n => String(n).padStart(2, '0');
+const isoDe = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d || 1); };
+const hoje = () => isoDe(new Date());
+const addDias = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return isoDe(d); };
+const addMeses = (s, n) => {
+  const d = parse(s); const dia = d.getDate();
+  const alvo = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const ult = new Date(alvo.getFullYear(), alvo.getMonth() + 1, 0).getDate();
+  alvo.setDate(Math.min(dia, ult)); return isoDe(alvo);
+};
+const diff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5); // dias de a até b
+const dsem = s => (parse(s).getDay() + 6) % 7; // 0 = segunda ... 6 = domingo
+const DSEM = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const DSEM_LONGO = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const fdm = s => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}` : '';
+const fdata = s => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : '';
+const fdia = s => `${DSEM[dsem(s)]} ${fdm(s)}`;
+const frel = s => { const n = diff(hoje(), s); if (n === 0) return 'hoje'; if (n === 1) return 'amanhã'; if (n === -1) return 'ontem'; return fdia(s); };
+const fh = h => (Math.round((+h || 0) * 10) / 10).toLocaleString('pt-BR') + 'h';
+const brl = v => (+v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const segundaDe = s => addDias(s, -dsem(s));
+const mesDe = s => s.slice(0, 7);
+const nomeMes = ym => { const [y, m] = ym.split('-').map(Number); return `${MESES[m - 1]} ${y}`; };
+const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(n) ? n : 0; };
+const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
+const ss = { get(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch {} }, del(k) { try { sessionStorage.removeItem(k); } catch {} } };
+
+function toast(msg, ms = 2600) {
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('oculto');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('oculto'), ms);
+}
+
+/* ===================== Banco (Supabase via funções RPC) ===================== */
+const TABELAS = ['itens', 'contatos', 'projetos', 'notas', 'gastos', 'metas', 'ajustes'];
+async function rpc(fn, args = {}) {
+  const r = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args)
+  });
+  if (!r.ok) throw new Error('Falha de conexão (' + r.status + ')');
+  const j = await r.json();
+  if (j && j.erro) { const e = new Error(j.erro); e.codigo = j.erro; throw e; }
+  return j;
+}
+
+const S = {
+  codigo: null,
+  db: Object.fromEntries(TABELAS.map(t => [t, []])),
+  aba: ls.get('ag_aba') || 'pessoal',
+  view: 'inicio',
+  cal: { modo: 'mes', ref: hoje(), sel: hoje() },
+  semanaRef: hoje(),
+  busca: { notas: '', contatos: '', historico: '' },
+  tmp: {}
+};
+
+let fila = []; let enviando = false;
+function salvar(tab, obj, silencioso) {
+  const arr = S.db[tab]; const i = arr.findIndex(x => x.id === obj.id);
+  if (i >= 0) arr[i] = obj; else arr.push(obj);
+  fila.push({ op: 'g', tab, obj: JSON.parse(JSON.stringify(obj)) });
+  if (!silencioso) render();
+  enviar();
+}
+function salvarVarios(tab, objs) { objs.forEach(o => salvar(tab, o, true)); render(); }
+function excluir(tab, id) {
+  const ids = Array.isArray(id) ? id : [id];
+  S.db[tab] = S.db[tab].filter(x => !ids.includes(x.id));
+  fila.push({ op: 'x', tab, ids }); render(); enviar();
+}
+async function enviar() {
+  if (enviando || !fila.length) return; enviando = true; mostrarSync('Salvando…');
+  try {
+    while (fila.length) {
+      const p = fila[0];
+      if (p.op === 'g') {
+        // junta gravações seguidas da mesma tabela num só envio
+        const lote = []; while (fila.length && fila[0].op === 'g' && fila[0].tab === p.tab && lote.length < 200) lote.push(fila.shift().obj);
+        const mapa = new Map(lote.map(o => [o.id, o]));
+        try { await rpc('app_gravar_varios', { p_codigo: S.codigo, p_tabela: p.tab, p_registros: [...mapa.values()].map(o => { const { id, ...dados } = o; return { id, dados }; }) }); }
+        catch (e) { fila.unshift(...lote.map(obj => ({ op: 'g', tab: p.tab, obj }))); throw e; }
+      } else {
+        await rpc('app_excluir_varios', { p_codigo: S.codigo, p_tabela: p.tab, p_ids: p.ids }); fila.shift();
+      }
+    }
+    mostrarSync('');
+  } catch (e) {
+    if (e.codigo === 'invalido' || e.codigo === 'sem_codigo') { sair(); return; }
+    mostrarSync('⚠ Sem conexão — tentando de novo…');
+    setTimeout(() => { enviando = false; enviar(); }, 8000); return;
+  }
+  enviando = false;
+}
+function mostrarSync(t) { const el = $('#sync'); if (el) el.textContent = t; }
+window.addEventListener('beforeunload', e => { if (fila.length) { e.preventDefault(); e.returnValue = ''; } });
+
+async function carregar() {
+  const j = await rpc('app_listar_tudo', { p_codigo: S.codigo });
+  for (const t of TABELAS) S.db[t] = (j.tabelas[t] || []).map(r => ({ id: r.id, ...r.dados }));
+}
+
+/* ===================== Acesso ===================== */
+let primeiraVez = false;
+async function iniciar() {
+  aplicarTema();
+  const salvo = ls.get('ag_codigo') || ss.get('ag_codigo');
+  if (salvo) {
+    S.codigo = salvo;
+    try { await carregar(); abrirApp(); return; }
+    catch (e) { if (e.codigo !== 'invalido' && e.codigo !== 'sem_codigo') { $('#login-erro').textContent = 'Sem conexão com o banco. Verifique a internet.'; } ls.del('ag_codigo'); ss.del('ag_codigo'); S.codigo = null; }
+  }
+  try {
+    const st = await rpc('app_status');
+    if (!st.codigo_definido) {
+      primeiraVez = true;
+      $('#login-msg').textContent = 'Primeiro acesso: crie seu código (mínimo 6 caracteres)';
+      $('#inp-codigo2').classList.remove('oculto'); $('#btn-entrar').textContent = 'Criar código';
+    }
+  } catch { $('#login-erro').textContent = 'Não consegui falar com o banco. Confira a internet e a configuração.'; }
+  $('#inp-codigo').focus();
+}
+$('#form-login').addEventListener('submit', async e => {
+  e.preventDefault();
+  const c = $('#inp-codigo').value.trim(); const err = $('#login-erro'); err.textContent = '';
+  const btn = $('#btn-entrar'); btn.disabled = true;
+  try {
+    if (primeiraVez) {
+      if (c.length < 6) throw { codigo: 'codigo_curto' };
+      if (c !== $('#inp-codigo2').value.trim()) throw { codigo: 'diferente' };
+      await rpc('app_definir_codigo', { p_novo: c });
+    }
+    await rpc('app_verificar', { p_codigo: c });
+    S.codigo = c;
+    if ($('#inp-lembrar').checked) ls.set('ag_codigo', c); else ss.set('ag_codigo', c);
+    await carregar(); abrirApp();
+  } catch (ex) {
+    const m = { invalido: 'Código incorreto.', bloqueado: 'Muitas tentativas erradas. Espere 10 minutos.', codigo_curto: 'Use pelo menos 6 caracteres.', diferente: 'Os dois códigos não são iguais.' };
+    err.textContent = m[ex.codigo] || 'Sem conexão. Tente de novo.';
+  } finally { btn.disabled = false; }
+});
+function abrirApp() {
+  $('#login').classList.add('oculto'); $('#app').classList.remove('oculto');
+  $('#inp-codigo').value = '';
+  render();
+}
+function sair() {
+  ls.del('ag_codigo'); ss.del('ag_codigo'); S.codigo = null;
+  location.reload();
+}
+
+/* ===================== Tema ===================== */
+function aplicarTema() {
+  const t = ls.get('ag_tema') || 'auto';
+  const escuro = t === 'escuro' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.tema = escuro ? 'escuro' : 'claro';
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', aplicarTema);
+
+/* ===================== Modelo: itens ===================== */
+const TIPOS = {
+  tarefa: { n: 'Tarefa', i: '☑' },
+  prazo: { n: 'Prazo', i: '⚑' },
+  mensagem: { n: 'Mensagem', i: '💬' },
+  compromisso: { n: 'Compromisso', i: '🕑' }
+};
+const AREAS = { estudo: 'Estudo', casa: 'Casa', pessoal: 'Pessoal', trabalho: 'Trabalho' };
+const PRIOS = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
+const REPS = { nenhuma: 'Não repete', diaria: 'Diária', semanal: 'Semanal', mensal: 'Mensal' };
+const PESO_PRIO = { alta: 0, media: 1, baixa: 2 };
+
+const abaDe = it => (it.area === 'trabalho' ? 'trabalho' : 'pessoal');
+const visivel = obj => S.aba === 'tudo' || (obj.aba ? (obj.aba === S.aba || obj.aba === 'ambos') : abaDe(obj) === S.aba);
+const dia = it => it.planejado || it.data || null; // dia em que o item "acontece"/será feito
+const prazoDe = it => it.data || null;
+const itensVis = () => S.db.itens.filter(visivel);
+const atrasado = it => { const h = hoje(); return !it.feito && ((dia(it) && dia(it) < h) || (it.data && it.data < h)); };
+const proxRep = (s, rep) => rep === 'diaria' ? addDias(s, 1) : rep === 'semanal' ? addDias(s, 7) : rep === 'mensal' ? addMeses(s, 1) : null;
+
+// ocorrências de um item num intervalo (itens repetidos aparecem em todos os dias da série)
+function ocorr(it, ini, fim) {
+  const base = dia(it); if (!base) return [];
+  if (!it.repeticao || it.repeticao === 'nenhuma' || it.feito) return (base >= ini && base <= fim) ? [base] : [];
+  const r = []; let d = base, n = 0;
+  while (d <= fim && n < 800) { if (d >= ini) r.push(d); d = proxRep(d, it.repeticao); n++; }
+  return r;
+}
+
+function marcarFeito(id, feito = true) {
+  const it = S.db.itens.find(x => x.id === id); if (!it) return;
+  if (feito) {
+    const novo = { ...it, feito: true, feitoEm: new Date().toISOString(), diaFeito: hoje() };
+    if (novo.horasReais == null) novo.horasReais = num(it.horas);
+    salvar('itens', novo, true);
+    if (it.repeticao && it.repeticao !== 'nenhuma') criarProxima(it);
+    toast('Feito! Foi para o histórico.');
+  } else {
+    salvar('itens', { ...it, feito: false, feitoEm: null, diaFeito: null }, true);
+  }
+  render();
+}
+function criarProxima(it) {
+  if (!dia(it)) return;
+  const prox = { ...it, id: uid(), feito: false, feitoEm: null, diaFeito: null, horasReais: null, historico: [], serie: it.serie || it.id, adiamentos: 0 };
+  // avança quantas repetições forem necessárias até cair depois de hoje
+  let k = 1, ref = proxRep(dia(it), it.repeticao);
+  while (ref <= hoje() && k < 1000) { ref = proxRep(ref, it.repeticao); k++; }
+  const avanca = s => { let x = s; for (let i = 0; i < k; i++) x = proxRep(x, it.repeticao); return x; };
+  if (it.data) prox.data = avanca(it.data);
+  if (it.planejado) prox.planejado = avanca(it.planejado);
+  if (prox.checklist) prox.checklist = prox.checklist.map(c => ({ ...c, ok: false }));
+  // a série continua só no item novo
+  salvar('itens', { ...S.db.itens.find(x => x.id === it.id), repeticao: 'nenhuma', serie: prox.serie }, true);
+  salvar('itens', prox, true);
+}
+
+function moverItem(it, novoDia, motivo = 'adiado') {
+  const de = dia(it);
+  const n = { ...it, historico: [...(it.historico || []), { de, para: novoDia, em: hoje(), tipo: motivo }] };
+  // se tem "fazer em" separado do prazo, move só o planejamento; senão move a data
+  if (it.planejado) n.planejado = novoDia;
+  else if (it.tipo === 'tarefa' && it.data && novoDia <= it.data) n.planejado = novoDia; // mantém o prazo, muda o dia de fazer
+  else n.data = novoDia;
+  n.adiamentos = (it.adiamentos || 0) + 1;
+  salvar('itens', n, true);
+}
+
+/* ===================== Contatos / WhatsApp ===================== */
+function waNumero(tel) {
+  let d = String(tel || '').replace(/\D/g, '');
+  if (d.startsWith('0')) d = d.replace(/^0+/, '');
+  if (d.length === 10 || d.length === 11) d = '55' + d;
+  return d;
+}
+const waLink = (tel, txt) => `https://wa.me/${waNumero(tel)}${txt ? '?text=' + encodeURIComponent(txt) : ''}`;
+const contato = id => S.db.contatos.find(c => c.id === id);
+const projeto = id => S.db.projetos.find(p => p.id === id);
+
+/* ===================== Ajustes e capacidade ===================== */
+function AJ() {
+  const r = S.db.ajustes.find(x => x.id === 'geral') || {};
+  return { semana: [3, 3, 3, 3, 3, 6, 4], folga: 20, excecoes: {}, ...r, id: 'geral' };
+}
+const horasLivres = s => { const a = AJ(); return a.excecoes[s] != null ? num(a.excecoes[s]) : num(a.semana[dsem(s)]); };
+const disponivel = s => Math.max(0, horasLivres(s) * (1 - num(AJ().folga) / 100));
+
+// carga (horas planejadas) por dia; itens feitos contam no dia em que foram feitos
+function cargaMapa(ini, fim, excluirIds) {
+  const m = {}; const ex = excluirIds || new Set();
+  const add = (d, h, ab) => { const x = m[d] || (m[d] = { t: 0, pessoal: 0, trabalho: 0 }); x.t += h; x[ab] += h; };
+  for (const it of S.db.itens) {
+    if (ex.has(it.id)) continue; const h = num(it.horas); if (!h) continue;
+    if (it.feito) { const d = it.diaFeito || (it.feitoEm || '').slice(0, 10); if (d >= ini && d <= fim) add(d, h, abaDe(it)); continue; }
+    for (const d of ocorr(it, ini, fim)) add(d, h, abaDe(it));
+  }
+  return m;
+}
+function livreMapa(ini, fim, excluirIds) {
+  const c = cargaMapa(ini, fim, excluirIds); const r = {};
+  for (let d = ini; d <= fim; d = addDias(d, 1)) r[d] = disponivel(d) - (c[d]?.t || 0);
+  return r;
+}
+function barraDia(s, carga) {
+  const c = carga[s] || { t: 0, pessoal: 0, trabalho: 0 }; const disp = disponivel(s); const livres = horasLivres(s);
+  const max = Math.max(disp, c.t, 0.01); const cheio = c.t > disp + 1e-9;
+  const pw = (c.pessoal / max) * 100, tw = (c.trabalho / max) * 100;
+  const marca = cheio ? `<i class="marca" style="left:${(disp / max) * 100}%"></i>` : '';
+  return `<div class="barra-wrap"><div class="barra ${cheio ? 'cheia' : ''}"><span class="seg-pessoal" style="width:${pw}%"></span><span class="seg-trabalho" style="width:${tw}%"></span>${marca}</div>
+    <div class="barra-txt"><span class="${cheio ? 'over' : ''}">${fh(c.t)} planejadas de ${fh(disp)}${cheio ? ' — passou ' + fh(c.t - disp) : ''}</span><span>${livres ? fh(livres) + ' livres − ' + num(AJ().folga) + '% folga' : 'dia sem horas livres'}</span></div></div>`;
+}
+
+/* ===================== Gastos previstos ===================== */
+const REPS_G = { unico: 'Único', mensal: 'Mensal', semestral: 'Semestral', anual: 'Anual' };
+const passoG = { mensal: 1, semestral: 6, anual: 12 };
+function ocorrGasto(g, ini, fim) {
+  if (!g.data) return [];
+  if (!g.repeticao || g.repeticao === 'unico') return (g.data >= ini && g.data <= fim) ? [g.data] : [];
+  const r = []; let d = g.data, n = 0;
+  while (d <= fim && n < 400) { if (d >= ini) r.push(d); n++; d = addMeses(g.data, passoG[g.repeticao] * n); }
+  return r;
+}
+function ocorrenciasGastos(ini, fim, todasAbas) {
+  const r = [];
+  for (const g of S.db.gastos) { if (!todasAbas && !visivel(g)) continue; for (const d of ocorrGasto(g, ini, fim)) { const pg = (g.pagamentos || {})[d]; r.push({ g, d, pago: !!pg, real: pg ? num(pg.valor) : null, valor: pg ? num(pg.valor) : num(g.valor) }); } }
+  return r.sort((a, b) => a.d.localeCompare(b.d));
+}
+const rotuloGasto = (o) => o.g.soMes ? nomeMes(mesDe(o.d)) : fdata(o.d);
+
+/* ===================== Renderização ===================== */
+function render() {
+  document.body.dataset.aba = S.aba;
+  document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativo', b.dataset.v === S.aba));
+  const mapaNav = { inicio: 'inicio', agenda: 'agenda', planejador: 'planejador', notas: 'notas' };
+  document.querySelectorAll('#menu button').forEach(b => b.classList.toggle('ativo', b.dataset.v === (mapaNav[S.view] || 'mais')));
+  const cor = getComputedStyle(document.body).getPropertyValue('--acento').trim();
+  document.querySelector('meta[name=theme-color]').content = cor || '#7c3aed';
+  const V = VIEWS[S.view] || VIEWS.inicio;
+  $('#main').innerHTML = V();
+}
+const nomeAba = () => ({ pessoal: 'Pessoal', trabalho: 'Trabalho', tudo: 'Tudo' }[S.aba]);
+
+function cardItem(it, o = {}) {
+  const ab = abaDe(it); const c = contato(it.contatoId); const p = projeto(it.projetoId);
+  const meta = [];
+  meta.push(`<span>${TIPOS[it.tipo]?.i || ''} ${TIPOS[it.tipo]?.n || ''}</span>`);
+  if (S.aba === 'tudo') meta.push(`<span class="tag ${ab}">${ab === 'trabalho' ? 'Trabalho' : 'Pessoal'}</span>`);
+  if (it.hora) meta.push(`<span>${esc(it.hora)}</span>`);
+  if (!o.semData && it.data && (o.mostrarData || it.planejado)) meta.push(`<span class="${!it.feito && it.data < hoje() ? 'atras' : ''}">${it.tipo === 'tarefa' || it.tipo === 'prazo' ? 'prazo ' : ''}${frel(it.data)}</span>`);
+  if (o.mostrarData && it.planejado && it.planejado !== it.data) meta.push(`<span class="${!it.feito && it.planejado < hoje() ? 'atras' : ''}">fazer ${frel(it.planejado)}</span>`);
+  if (num(it.horas)) meta.push(`<span>${fh(it.horas)}</span>`);
+  if (it.area && it.area !== 'trabalho' && it.area !== 'pessoal') meta.push(`<span>${AREAS[it.area]}</span>`);
+  if (p) meta.push(`<span>◆ ${esc(p.nome)}</span>`);
+  if (it.checklist?.length) meta.push(`<span>☑ ${it.checklist.filter(x => x.ok).length}/${it.checklist.length}</span>`);
+  if (it.repeticao && it.repeticao !== 'nenhuma') meta.push(`<span>↻ ${REPS[it.repeticao]}</span>`);
+  if (o.virtual) meta.push(`<span>↻ repetição</span>`);
+  const wa = it.tipo === 'mensagem' && c && c.telefone && !it.feito ? `<a class="mini-wa" href="${waLink(c.telefone, it.mensagem)}" target="_blank" rel="noopener">WhatsApp</a>` : '';
+  return `<div class="item ab-${ab} ${it.feito ? 'feito' : ''}">
+    <button class="chk" data-a="feito" data-id="${it.id}" aria-label="Marcar como feito"></button>
+    <div class="item-corpo" data-a="verItem" data-id="${it.id}">
+      <div class="item-tit">${it.prioridade ? `<span class="pd pd-${it.prioridade}"></span>` : ''}${esc(it.titulo)}${it.tipo === 'mensagem' && c ? ` <span style="font-weight:500;color:var(--txt2)">→ ${esc(c.nome)}</span>` : ''}</div>
+      <div class="item-meta">${meta.join('')}</div>
+    </div>${wa}
+  </div>`;
+}
+const ordenar = arr => arr.sort((a, b) => (dia(a) || '9').localeCompare(dia(b) || '9') || (a.hora || '99').localeCompare(b.hora || '99') || (PESO_PRIO[a.prioridade] ?? 1) - (PESO_PRIO[b.prioridade] ?? 1));
+const lista = (arr, o) => arr.length ? arr.map(it => cardItem(it, o)).join('') : `<div class="vazio">${o?.vazio || 'Nada por aqui.'}</div>`;
+
+const VIEWS = {};
+
+/* ---------- Avisos (tela inicial) ---------- */
+VIEWS.inicio = () => {
+  const h = hoje(), h7 = addDias(h, 7);
+  const its = itensVis().filter(it => !it.feito);
+  const atr = ordenar(its.filter(atrasado));
+  const setA = new Set(atr.map(x => x.id));
+  const deHoje = ordenar(its.filter(it => !setA.has(it.id) && (dia(it) === h || it.data === h)));
+  const setH = new Set(deHoje.map(x => x.id));
+  // próximos 7 dias (inclui repetições)
+  const prox = [];
+  for (const it of its) { if (setA.has(it.id) || setH.has(it.id)) continue; const oc = ocorr(it, addDias(h, 1), h7); if (oc.length) prox.push({ it, d: oc[0], virtual: oc[0] !== dia(it) }); else if (it.data && it.data > h && it.data <= h7) prox.push({ it, d: it.data }); }
+  prox.sort((a, b) => a.d.localeCompare(b.d) || (a.it.hora || '99').localeCompare(b.it.hora || '99'));
+  // avisos antecipados de prazos
+  const antec = its.filter(it => it.data && num(it.avisoAntes) > 0 && diff(h, it.data) > 0 && diff(h, it.data) <= num(it.avisoAntes));
+  const semData = its.filter(it => !dia(it));
+  // gastos
+  const ini = h.slice(0, 7) + '-01', fimMes = addDias(addMeses(ini, 1), -1);
+  const gMes = ocorrenciasGastos(ini, fimMes);
+  const g30 = ocorrenciasGastos(addDias(h, 1), addDias(h, 30)).filter(o => !o.pago);
+  const c = cargaMapa(h, h);
+
+  let html = `<h2 class="tit">Avisos <span class="sub">${DSEM_LONGO[dsem(h)]}, ${fdata(h)} · ${nomeAba()}</span> <span id="sync" style="margin-left:auto"></span></h2>`;
+  if (antec.length || g30.length) {
+    html += `<div class="card secao-aviso"><h3>⚠ Avisos antecipados</h3>`;
+    html += antec.map(it => `<div class="alerta amar" data-a="verItem" data-id="${it.id}" style="cursor:pointer;margin:6px 0"><b>${esc(it.titulo)}</b> — prazo em ${diff(h, it.data)} dia(s) (${fdia(it.data)})</div>`).join('');
+    html += g30.map(o => { const n = diff(h, o.d); return `<div class="alerta ${n <= 7 ? 'verm' : 'amar'}" data-a="verGasto" data-id="${o.g.id}" style="cursor:pointer;margin:6px 0">💰 <b>${esc(o.g.nome)}</b>${o.g.valor ? ' — ' + brl(o.g.valor) : ''} · ${n <= 7 ? 'em ' + n + ' dia(s)' : 'em ' + n + ' dias'} (${rotuloGasto(o)})</div>`; }).join('');
+    html += `</div>`;
+  }
+  html += `<div class="card secao-atrasado"><h3>Atrasado <span class="cont">${atr.length}</span></h3>${lista(atr, { mostrarData: true, vazio: 'Nada atrasado. 👏' })}
+    ${atr.length ? `<div class="linha-btns" style="margin-top:10px"><button class="btn peq" data-a="revisao">Replanejar atrasados</button></div>` : ''}</div>`;
+  html += `<div class="card secao-hoje"><h3>Hoje <span class="cont">${deHoje.length}</span></h3>${barraDia(h, c)}<div style="margin-top:8px">${lista(deHoje, { vazio: 'Nada para hoje.' })}</div>
+    <div class="linha-btns" style="margin-top:10px"><button class="btn peq" data-a="revisao">Revisão do fim do dia</button><button class="btn peq" data-a="novo" data-dia="${h}">+ Para hoje</button></div></div>`;
+  html += `<div class="card"><h3>Próximos 7 dias <span class="cont">${prox.length}</span></h3>`;
+  if (!prox.length) html += `<div class="vazio">Semana tranquila.</div>`;
+  let ult = '';
+  for (const p of prox) { if (p.d !== ult) { html += `<div class="grupo-dia">${frel(p.d)}${frel(p.d) !== fdia(p.d) ? ' · ' + fdia(p.d) : ''}</div>`; ult = p.d; } html += cardItem(p.it, { virtual: p.virtual }); }
+  html += `</div>`;
+  // gastos do mês
+  const pend = gMes.filter(o => !o.pago);
+  html += `<div class="card"><h3>💰 Gastos previstos de ${MESES[+h.slice(5, 7) - 1]} <span class="cont">${gMes.length}</span></h3>`;
+  if (gMes.length) {
+    html += `<div style="margin-bottom:8px">Este mês você tem <b>${gMes.length} gasto(s) previsto(s)</b> — total estimado <b>${brl(gMes.reduce((s, o) => s + o.valor, 0))}</b>${pend.length !== gMes.length ? ` (${gMes.length - pend.length} já pago(s))` : ''}.</div>`;
+    html += `<div class="lista-sel">` + gMes.map(o => `<div class="linha" data-a="verGasto" data-id="${o.g.id}"><div class="info"><b style="${o.pago ? 'text-decoration:line-through;color:var(--txt2)' : ''}">${esc(o.g.nome)}</b><small>${rotuloGasto(o)}${o.pago ? ' · pago' : ''}</small></div><b>${o.valor ? brl(o.valor) : '—'}</b></div>`).join('') + `</div>`;
+  } else html += `<div class="vazio">Nenhum gasto previsto para este mês.</div>`;
+  html += `</div>`;
+  if (semData.length) html += `<div class="card"><h3>Sem data <span class="cont">${semData.length}</span></h3>${lista(semData)}</div>`;
+  return html;
+};
+
+/* ---------- Agenda (mês / semana) ---------- */
+function itensDoDia(s) {
+  const r = [];
+  for (const it of itensVis()) {
+    if (it.feito) { if ((it.diaFeito || dia(it)) === s) r.push({ it }); continue; }
+    if (ocorr(it, s, s).length) r.push({ it, virtual: dia(it) !== s });
+    else if (it.planejado && it.data === s) r.push({ it, prazoAqui: true });
+  }
+  return r.sort((a, b) => (a.it.hora || '99').localeCompare(b.it.hora || '99'));
+}
+VIEWS.agenda = () => {
+  const { modo, ref, sel } = S.cal; const h = hoje();
+  let ini, fim, titulo;
+  if (modo === 'mes') { const p = ref.slice(0, 7) + '-01'; ini = segundaDe(p); const ultimo = addDias(addMeses(p, 1), -1); fim = addDias(segundaDe(ultimo), 6); titulo = nomeMes(ref.slice(0, 7)); }
+  else { ini = segundaDe(ref); fim = addDias(ini, 6); titulo = `${fdm(ini)} – ${fdm(fim)}`; }
+  // pré-calcula ocorrências
+  const mapa = {}; const push = (d, x) => (mapa[d] || (mapa[d] = [])).push(x);
+  for (const it of itensVis()) {
+    if (it.feito) { const d = it.diaFeito || dia(it); if (d && d >= ini && d <= fim) push(d, { it }); continue; }
+    for (const d of ocorr(it, ini, fim)) push(d, { it, virtual: d !== dia(it) });
+  }
+  const gastos = {}; for (const o of ocorrenciasGastos(ini, fim)) (gastos[o.d] || (gastos[o.d] = [])).push(o);
+  const carga = cargaMapa(ini, fim);
+  let html = `<h2 class="tit">Agenda <span class="sub">${nomeAba()}</span></h2>
+  <div class="cal-top">
+    <button class="icone-btn" data-a="calNav" data-v="-1" aria-label="Anterior">‹</button>
+    <div class="mes">${titulo}</div>
+    <button class="icone-btn" data-a="calNav" data-v="1" aria-label="Próximo">›</button>
+  </div>
+  <div class="cal-top"><div class="seg"><button class="${modo === 'mes' ? 'ativo' : ''}" data-a="calModo" data-v="mes">Mês</button><button class="${modo === 'semana' ? 'ativo' : ''}" data-a="calModo" data-v="semana">Semana</button></div>
+  <button class="btn peq" data-a="calHoje" style="margin-left:auto">Hoje</button></div>`;
+  if (modo === 'mes') {
+    html += `<div class="cal">${DSEM.map(d => `<div class="cab">${d}</div>`).join('')}`;
+    for (let d = ini; d <= fim; d = addDias(d, 1)) {
+      const xs = mapa[d] || []; const gs = gastos[d] || [];
+      const bol = xs.slice(0, 5).map(x => `<i class="bol ${atrasado(x.it) && !x.virtual ? 'atr' : abaDe(x.it)}"></i>`).join('') + (gs.length ? '<i class="bol gasto"></i>' : '');
+      const cheio = (carga[d]?.t || 0) > disponivel(d) + 1e-9;
+      html += `<div class="d ${d.slice(0, 7) !== ref.slice(0, 7) ? 'fora' : ''} ${d === h ? 'hoje' : ''} ${d === sel ? 'sel' : ''} ${cheio ? 'cheio' : ''}" data-a="calSel" data-v="${d}"><span class="n">${+d.slice(8)}</span><span class="bolinhas">${bol}</span></div>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="semana">`;
+    for (let d = ini; d <= fim; d = addDias(d, 1)) {
+      const xs = mapa[d] || [];
+      html += `<div class="col ${d === h ? 'hoje' : ''}" data-a="calSel" data-v="${d}"><div class="cn">${fdia(d)}</div>${barraMini(d, carga)}
+      ${xs.map(x => `<div class="mini ${abaDe(x.it)} ${x.it.feito ? 'feito' : ''}">${x.it.hora ? esc(x.it.hora) + ' ' : ''}${esc(x.it.titulo)}</div>`).join('')}
+      ${(gastos[d] || []).map(o => `<div class="mini" style="border-left-color:var(--tudo)">💰 ${esc(o.g.nome)}</div>`).join('')}</div>`;
+    }
+    html += `</div>`;
+  }
+  // dia selecionado
+  const xs = itensDoDia(sel); const gs = ocorrenciasGastos(sel, sel);
+  html += `<div class="card" style="margin-top:14px"><h3>${DSEM_LONGO[dsem(sel)]}, ${fdata(sel)} <span class="cont">${xs.length}</span></h3>${barraDia(sel, cargaMapa(sel, sel))}
+    <div style="margin-top:8px">${xs.length ? xs.map(x => cardItem(x.it, { virtual: x.virtual, mostrarData: x.prazoAqui })).join('') : '<div class="vazio">Nenhum item neste dia.</div>'}</div>
+    ${gs.map(o => `<div class="alerta amar" data-a="verGasto" data-id="${o.g.id}" style="cursor:pointer">💰 ${esc(o.g.nome)} ${o.valor ? '— ' + brl(o.valor) : ''}${o.pago ? ' (pago)' : ''}</div>`).join('')}
+    <div class="linha-btns" style="margin-top:10px"><button class="btn peq pri" data-a="novo" data-dia="${sel}">+ Adicionar neste dia</button><button class="btn peq" data-a="novaNota" data-dia="${sel}">+ Nota do dia</button><button class="btn peq" data-a="horasDia" data-v="${sel}">Horas deste dia</button></div>
+    ${notasDoDia(sel)}</div>`;
+  return html;
+};
+function barraMini(d, carga) {
+  const c = carga[d]?.t || 0, disp = disponivel(d); const cheio = c > disp + 1e-9;
+  const w = disp ? Math.min(100, (c / disp) * 100) : (c ? 100 : 0);
+  return `<div class="barra ${cheio ? 'cheia' : ''}" style="height:6px;margin-bottom:4px"><span class="seg-pessoal" style="width:${w}%;background:${cheio ? 'var(--verm)' : 'var(--acento)'}"></span></div>`;
+}
+function notasDoDia(s) {
+  const ns = S.db.notas.filter(n => n.dia === s && visivel(n)); if (!ns.length) return '';
+  return `<div class="grupo-dia" style="margin-top:14px">Notas do dia</div>` + ns.map(n => `<div class="lista-sel"><div class="linha" data-a="verNota" data-id="${n.id}"><div class="info"><b>${esc(n.titulo || 'Sem título')}</b><div class="nota-txt">${esc(n.texto)}</div></div></div></div>`).join('');
+}
+
+/* ---------- Mais ---------- */
+VIEWS.mais = () => `<h2 class="tit">Mais</h2><div class="mais-grade">
+  <button data-a="ir" data-v="gastos"><span>💰</span>Gastos previstos<small>Próximos 12 meses</small></button>
+  <button data-a="ir" data-v="contatos"><span>👤</span>Contatos<small>WhatsApp com um toque</small></button>
+  <button data-a="ir" data-v="projetos"><span>◆</span>Projetos / usinas<small>Prazos, tarefas e notas</small></button>
+  <button data-a="ir" data-v="metas"><span>🎯</span>Metas de prova<small>Plano de estudo</small></button>
+  <button data-a="ir" data-v="resumo"><span>📊</span>Resumo da semana<small>Planejado × realizado</small></button>
+  <button data-a="ir" data-v="historico"><span>✓</span>Histórico<small>Tudo que foi feito</small></button>
+  <button data-a="ir" data-v="ajustes"><span>⚙</span>Ajustes<small>Horas, tema, código</small></button>
+</div>`;
+
+/* ---------- Histórico ---------- */
+VIEWS.historico = () => {
+  const q = S.busca.historico.toLowerCase();
+  const fs = itensVis().filter(i => i.feito && (!q || (i.titulo || '').toLowerCase().includes(q))).sort((a, b) => (b.feitoEm || '').localeCompare(a.feitoEm || ''));
+  let html = `<h2 class="tit">Histórico <span class="sub">${fs.length} feito(s) · ${nomeAba()}</span></h2>
+  <input class="inp busca" placeholder="Buscar no histórico…" value="${esc(S.busca.historico)}" data-busca="historico">`;
+  let ult = '';
+  html += `<div class="card">`;
+  if (!fs.length) html += `<div class="vazio">Nada concluído ainda.</div>`;
+  for (const it of fs.slice(0, 300)) { const d = (it.diaFeito || (it.feitoEm || '').slice(0, 10)); if (d !== ult) { html += `<div class="grupo-dia">${fdia(d)}</div>`; ult = d; } html += cardItem(it); }
+  return html + `</div>`;
+};
+
+/* ---------- Contatos ---------- */
+VIEWS.contatos = () => {
+  const q = S.busca.contatos.toLowerCase();
+  const cs = S.db.contatos.filter(c => visivel(c) && (!q || (c.nome + ' ' + (c.telefone || '') + ' ' + (c.obs || '')).toLowerCase().includes(q))).sort((a, b) => a.nome.localeCompare(b.nome));
+  return `<h2 class="tit">Contatos <span class="sub">${nomeAba()}</span><button class="btn peq pri" data-a="novoContato" style="margin-left:auto">+ Contato</button></h2>
+  <input class="inp busca" placeholder="Buscar contato…" value="${esc(S.busca.contatos)}" data-busca="contatos">
+  <div class="card"><div class="lista-sel">${cs.length ? cs.map(c => {
+    const pend = S.db.itens.filter(i => i.contatoId === c.id && !i.feito).length;
+    return `<div class="linha"><div class="info" data-a="verContato" data-id="${c.id}"><b>${esc(c.nome)}</b><small>${esc(c.telefone || 'sem telefone')}${pend ? ` · ${pend} lembrete(s)` : ''}</small></div>
+    ${c.telefone ? `<a class="btn wa peq" href="${waLink(c.telefone)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</div>`;
+  }).join('') : '<div class="vazio">Nenhum contato.</div>'}</div></div>`;
+};
+
+/* ---------- Projetos ---------- */
+VIEWS.projetos = () => {
+  const ps = S.db.projetos.slice().sort((a, b) => (a.status === 'concluido') - (b.status === 'concluido') || a.nome.localeCompare(b.nome));
+  return `<h2 class="tit">Projetos / usinas <span class="sub">Trabalho</span><button class="btn peq pri" data-a="novoProjeto" style="margin-left:auto">+ Projeto</button></h2>
+  <div class="card"><div class="lista-sel">${ps.length ? ps.map(p => {
+    const its = S.db.itens.filter(i => i.projetoId === p.id); const pend = its.filter(i => !i.feito);
+    const prox = pend.filter(i => i.data).sort((a, b) => a.data.localeCompare(b.data))[0];
+    return `<div class="linha" data-a="verProjeto" data-id="${p.id}"><div class="info"><b>${esc(p.nome)}</b><small>${p.status === 'concluido' ? 'Concluído' : 'Em andamento'} · ${pend.length} pendente(s)${prox ? ` · próximo prazo ${fdia(prox.data)}` : ''}</small></div><span>›</span></div>`;
+  }).join('') : '<div class="vazio">Nenhum projeto. Crie um para cada usina/cliente.</div>'}</div></div>`;
+};
+VIEWS.projeto = () => {
+  const p = projeto(S.tmp.projetoId); if (!p) { S.view = 'projetos'; return VIEWS.projetos(); }
+  const its = ordenar(S.db.itens.filter(i => i.projetoId === p.id)); const ns = S.db.notas.filter(n => n.projetoId === p.id).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  const gs = S.db.gastos.filter(g => g.projetoId === p.id);
+  return `<h2 class="tit"><button class="icone-btn" data-a="ir" data-v="projetos">‹</button> ${esc(p.nome)} <button class="btn peq" data-a="editarProjeto" data-id="${p.id}" style="margin-left:auto">Editar</button></h2>
+  ${p.obs ? `<div class="card" style="white-space:pre-wrap">${esc(p.obs)}</div>` : ''}
+  <div class="card"><h3>Prazos e tarefas <span class="cont">${its.filter(i => !i.feito).length}</span></h3>${lista(its.filter(i => !i.feito), { mostrarData: true, vazio: 'Nada pendente.' })}
+  <div class="linha-btns" style="margin-top:10px"><button class="btn peq pri" data-a="novo" data-projeto="${p.id}">+ Tarefa/prazo</button></div></div>
+  <div class="card"><h3>Anotações <span class="cont">${ns.length}</span></h3><div class="lista-sel">${ns.map(n => `<div class="linha" data-a="verNota" data-id="${n.id}"><div class="info"><b>${esc(n.titulo || 'Sem título')}</b><small>${fdata(n.data)}</small><div class="nota-txt">${esc(n.texto)}</div></div></div>`).join('') || '<div class="vazio">Sem anotações.</div>'}</div>
+  <div class="linha-btns" style="margin-top:10px"><button class="btn peq" data-a="novaNota" data-projeto="${p.id}">+ Anotação</button></div></div>
+  ${gs.length ? `<div class="card"><h3>Gastos ligados</h3>${gs.map(g => `<div class="linha" data-a="verGasto" data-id="${g.id}" style="cursor:pointer;padding:6px 0">💰 ${esc(g.nome)} ${g.valor ? '— ' + brl(g.valor) : ''}</div>`).join('')}</div>` : ''}
+  <div class="card"><h3>Concluídos <span class="cont">${its.filter(i => i.feito).length}</span></h3>${lista(its.filter(i => i.feito))}</div>`;
+};
+
+/* ---------- Notas ---------- */
+VIEWS.notas = () => {
+  const q = S.busca.notas.toLowerCase();
+  const ns = S.db.notas.filter(n => visivel(n) && (!q || ((n.titulo || '') + ' ' + (n.texto || '') + ' ' + (projeto(n.projetoId)?.nome || '') + ' ' + (contato(n.contatoId)?.nome || '')).toLowerCase().includes(q)))
+    .sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.criado || '').localeCompare(a.criado || ''));
+  return `<h2 class="tit">Bloco de notas <span class="sub">${nomeAba()}</span><button class="btn peq pri" data-a="novaNota" style="margin-left:auto">+ Nota</button></h2>
+  <input class="inp busca" placeholder="Buscar nas notas…" value="${esc(S.busca.notas)}" data-busca="notas">
+  <div class="card"><div class="lista-sel">${ns.length ? ns.map(n => {
+    const ligs = [projeto(n.projetoId) && '◆ ' + esc(projeto(n.projetoId).nome), contato(n.contatoId) && '👤 ' + esc(contato(n.contatoId).nome), n.dia && '📅 ' + fdm(n.dia)].filter(Boolean).join(' · ');
+    return `<div class="linha" data-a="verNota" data-id="${n.id}"><div class="info"><b>${esc(n.titulo || 'Sem título')}</b><small>${fdata(n.data)}${ligs ? ' · ' + ligs : ''}</small><div class="nota-txt">${esc(n.texto)}</div></div></div>`;
+  }).join('') : '<div class="vazio">Nenhuma nota encontrada.</div>'}</div></div>`;
+};
+
+/* ---------- Gastos previstos ---------- */
+VIEWS.gastos = () => {
+  const h = hoje(); const ini = h.slice(0, 7) + '-01'; const fim = addDias(addMeses(ini, 12), -1);
+  const oc = ocorrenciasGastos(ini, fim);
+  const meses = []; for (let i = 0; i < 12; i++) { const ym = mesDe(addMeses(ini, i)); meses.push({ ym, total: 0, itens: [] }); }
+  for (const o of oc) { const m = meses.find(x => x.ym === mesDe(o.d)); if (m) { m.total += o.valor; m.itens.push(o); } }
+  const max = Math.max(...meses.map(m => m.total), 1); const media = meses.reduce((s, m) => s + m.total, 0) / 12;
+  const pesados = new Set(meses.filter(m => m.total > 0).sort((a, b) => b.total - a.total).slice(0, 3).filter(m => m.total >= media * 1.2).map(m => m.ym));
+  const total12 = meses.reduce((s, m) => s + m.total, 0);
+  let html = `<h2 class="tit">Gastos previstos <span class="sub">${nomeAba()} · lembretes, não é extrato</span><button class="btn peq pri" data-a="novoGasto" style="margin-left:auto">+ Gasto</button></h2>
+  <div class="kpis"><div class="kpi"><div class="v">${brl(meses[0].total)}</div><div class="l">Este mês</div></div><div class="kpi"><div class="v">${brl(total12)}</div><div class="l">Próximos 12 meses</div></div>
+  <div class="kpi"><div class="v">${brl(media)}</div><div class="l">Média por mês</div></div><div class="kpi"><div class="v">${pesados.size ? [...pesados].map(ym => MESES[+ym.slice(5) - 1].slice(0, 3)).join(', ') : '—'}</div><div class="l">Meses mais pesados</div></div></div>
+  <div class="card"><h3>Próximos 12 meses</h3><div class="meses">${meses.map(m => `<div class="m ${pesados.has(m.ym) ? 'pesado' : ''}" data-a="rolarMes" data-v="${m.ym}" title="${nomeMes(m.ym)}: ${brl(m.total)}"><span class="val">${m.total ? Math.round(m.total / 100) / 10 + 'k' : ''}</span><div class="b" style="height:${(m.total / max) * 100}%"></div><span class="r">${MESES[+m.ym.slice(5) - 1].slice(0, 3)}</span></div>`).join('')}</div>
+  <div class="barra-txt" style="margin-top:8px"><span>Laranja = meses mais pesados</span><span>valores em mil R$</span></div></div>`;
+  for (const m of meses) {
+    if (!m.itens.length) continue;
+    html += `<div class="card" id="mes-${m.ym}"><h3 style="text-transform:capitalize">${nomeMes(m.ym)} ${pesados.has(m.ym) ? '<span class="tag" style="background:var(--tudo-claro);color:var(--tudo)">pesado</span>' : ''}<span class="cont">${brl(m.total)}</span></h3><div class="lista-sel">`;
+    html += m.itens.map(o => `<div class="linha"><div class="info" data-a="verGasto" data-id="${o.g.id}"><b style="${o.pago ? 'text-decoration:line-through;color:var(--txt2)' : ''}">${esc(o.g.nome)}</b><small>${rotuloGasto(o)} · ${REPS_G[o.g.repeticao || 'unico']}${S.aba === 'tudo' ? ' · ' + (o.g.aba === 'trabalho' ? 'Trabalho' : 'Pessoal') : ''}${o.pago ? ` · pago ${brl(o.real)}${o.g.valor ? ` (previsto ${brl(o.g.valor)})` : ''}` : ''}</small></div>
+      <b style="white-space:nowrap">${o.g.valor || o.pago ? brl(o.valor) : '—'}</b>
+      ${o.pago ? `<button class="btn peq" data-a="desfazerPago" data-id="${o.g.id}" data-d="${o.d}">Desfazer</button>` : `<button class="btn peq ok" data-a="pagar" data-id="${o.g.id}" data-d="${o.d}">Pago</button>`}</div>`).join('');
+    html += `</div></div>`;
+  }
+  if (!oc.length) html += `<div class="card vazio">Cadastre gastos que não acontecem todo mês: IPVA, IPTU, presentes, manutenção, cursos, inscrições…</div>`;
+  // comparação estimado × real
+  const pagos = []; for (const g of S.db.gastos.filter(visivel)) for (const [d, p] of Object.entries(g.pagamentos || {})) pagos.push({ g, d, p });
+  if (pagos.length) {
+    pagos.sort((a, b) => b.d.localeCompare(a.d));
+    const te = pagos.reduce((s, x) => s + num(x.g.valor), 0), tr = pagos.reduce((s, x) => s + num(x.p.valor), 0);
+    html += `<div class="card"><h3>Pagos: previsto × real</h3><table class="tab"><tr><th>Gasto</th><th>Data</th><th class="num">Previsto</th><th class="num">Real</th></tr>
+    ${pagos.slice(0, 30).map(x => `<tr><td>${esc(x.g.nome)}</td><td>${fdm(x.d)}</td><td class="num">${x.g.valor ? brl(x.g.valor) : '—'}</td><td class="num" style="color:${num(x.p.valor) > num(x.g.valor) && x.g.valor ? 'var(--verm)' : 'inherit'}">${brl(x.p.valor)}</td></tr>`).join('')}
+    <tr><th>Total</th><th></th><th class="num">${brl(te)}</th><th class="num">${brl(tr)}</th></tr></table></div>`;
+  }
+  return html;
+};
+
+/* ---------- Ajustes ---------- */
+VIEWS.ajustes = () => {
+  const a = AJ(); const t = ls.get('ag_tema') || 'auto';
+  return `<h2 class="tit">Ajustes</h2>
+  <div class="card"><h3>Horas livres por dia da semana</h3>
+    <form data-form="horas"><div class="campos2" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))">${DSEM_LONGO.map((d, i) => `<label class="campo">${d}<input type="number" step="0.5" min="0" max="24" name="d${i}" value="${a.semana[i]}"></label>`).join('')}</div>
+    <label class="campo">Folga para imprevistos (%)<input type="number" min="0" max="80" step="5" name="folga" value="${a.folga}"></label>
+    <button class="btn pri" type="submit">Salvar horas</button></form>
+    <p class="vazio" style="margin-top:10px">Para mudar só um dia específico (feriado, viagem), abra o dia na Agenda ou no Planejador e toque em “Horas deste dia”.</p>
+    ${excecoesHtml()}</div>
+  <div class="card"><h3>Aparência</h3><div class="seg" style="display:inline-flex">${['auto', 'claro', 'escuro'].map(v => `<button class="${t === v ? 'ativo' : ''}" data-a="temaSet" data-v="${v}">${{ auto: 'Automático', claro: 'Claro', escuro: 'Escuro' }[v]}</button>`).join('')}</div></div>
+  <div class="card"><h3>Código de acesso</h3>
+    <form data-form="codigo"><label class="campo">Código atual<input type="password" name="atual" required></label>
+    <label class="campo">Novo código (mín. 6)<input type="password" name="novo" required minlength="6"></label>
+    <label class="campo">Repita o novo<input type="password" name="novo2" required minlength="6"></label>
+    <button class="btn pri" type="submit">Trocar código</button></form></div>
+  <div class="card"><h3>Dados</h3><div class="linha-btns"><button class="btn" data-a="backup">Baixar cópia (backup)</button><button class="btn perigo" data-a="sair">Sair deste aparelho</button></div>
+  <p class="vazio" style="margin-top:8px">${S.db.itens.length} itens · ${S.db.notas.length} notas · ${S.db.contatos.length} contatos · ${S.db.gastos.length} gastos</p></div>`;
+};
+function excecoesHtml() {
+  const a = AJ(); const ex = Object.entries(a.excecoes).filter(([d]) => d >= hoje()).sort();
+  if (!ex.length) return '';
+  return `<div class="grupo-dia" style="margin-top:14px">Dias ajustados</div>` + ex.map(([d, h]) => `<div class="check-linha"><span class="txt">${fdia(d)}/${d.slice(0, 4)} — ${fh(h)} livres</span><button class="btn peq" data-a="removerExc" data-v="${d}">Remover</button></div>`).join('');
+}
+</script>
+<script>
+/* ===================== Modal ===================== */
+function abrirModal(html) { $('#folha').innerHTML = html; $('#modal').classList.remove('oculto'); document.body.style.overflow = 'hidden'; $('#folha').scrollTop = 0; }
+function fecharModal() { $('#modal').classList.add('oculto'); $('#folha').innerHTML = ''; document.body.style.overflow = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') fecharModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').classList.contains('oculto')) fecharModal(); });
+const cab = t => `<div class="folha-cab"><h2>${t}</h2><button class="icone-btn" data-a="fechar" aria-label="Fechar">✕</button></div>`;
+const chips = (nome, opcoes, atual) => `<div class="chips">${Object.entries(opcoes).map(([v, n]) => `<label><input type="radio" name="${nome}" value="${v}" ${v === atual ? 'checked' : ''}>${n}</label>`).join('')}</div>`;
+const opcoesSel = (arr, atual, vazio = '— nenhum —') => `<option value="">${vazio}</option>` + arr.map(([v, n]) => `<option value="${esc(v)}" ${v === atual ? 'selected' : ''}>${esc(n)}</option>`).join('');
+const dadosForm = f => Object.fromEntries(new FormData(f).entries());
+
+/* ===================== Formulário de item ===================== */
+function formItem(it, pre = {}) {
+  const novo = !it;
+  it = it || { tipo: pre.tipo || 'tarefa', area: pre.area || (S.aba === 'trabalho' ? 'trabalho' : 'pessoal'), prioridade: 'media', repeticao: 'nenhuma', data: pre.dia || '', projetoId: pre.projeto || '', contatoId: pre.contato || '', avisoAntes: 0 };
+  if (pre.projeto) it.area = 'trabalho';
+  const cs = S.db.contatos.slice().sort((a, b) => a.nome.localeCompare(b.nome)).map(c => [c.id, c.nome]);
+  const ps = S.db.projetos.filter(p => p.status !== 'concluido' || p.id === it.projetoId).map(p => [p.id, p.nome]);
+  abrirModal(`${cab(novo ? 'Novo item' : 'Editar item')}
+  <form data-form="item" data-id="${novo ? '' : it.id}">
+    <label class="campo">Título<input name="titulo" required value="${esc(it.titulo || '')}" placeholder="Ex.: Usina X concluída, mandar mensagem para Fulano…" autofocus></label>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Tipo</span>${chips('tipo', Object.fromEntries(Object.entries(TIPOS).map(([k, v]) => [k, v.i + ' ' + v.n])), it.tipo)}</div>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Área</span>${chips('area', AREAS, it.area)}</div>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Prioridade</span>${chips('prioridade', PRIOS, it.prioridade || 'media')}</div>
+    <div class="campos2">
+      <label class="campo"><span data-rot="data">Data</span><input type="date" name="data" value="${it.data || ''}"></label>
+      <label class="campo">Hora (opcional)<input type="time" name="hora" value="${it.hora || ''}"></label>
+    </div>
+    <div class="campos2" data-so="tarefa prazo compromisso">
+      <label class="campo" data-so="tarefa prazo">Fazer em (dia planejado)<input type="date" name="planejado" value="${it.planejado || ''}"></label>
+      <label class="campo">Tempo estimado (horas)<input type="number" step="0.25" min="0" name="horas" value="${it.horas ?? ''}" placeholder="Ex.: 1,5"></label>
+    </div>
+    <div class="campos2">
+      <label class="campo">Repetição<select name="repeticao">${Object.entries(REPS).map(([k, v]) => `<option value="${k}" ${k === (it.repeticao || 'nenhuma') ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label class="campo" data-so="prazo tarefa">Aviso antecipado<select name="avisoAntes"><option value="0">Sem aviso</option><option value="1" ${+it.avisoAntes === 1 ? 'selected' : ''}>1 dia antes</option><option value="3" ${+it.avisoAntes === 3 ? 'selected' : ''}>3 dias antes</option></select></label>
+    </div>
+    <label class="campo">Contato<select name="contatoId">${opcoesSel(cs, it.contatoId)}</select></label>
+    <label class="campo" data-so="mensagem">Texto da mensagem (opcional — já abre escrito no WhatsApp)<textarea name="mensagem" rows="2">${esc(it.mensagem || '')}</textarea></label>
+    <label class="campo" data-area="trabalho">Projeto / usina<select name="projetoId">${opcoesSel(ps, it.projetoId)}</select></label>
+    <label class="campo">Link (opcional)<input type="url" name="link" value="${esc(it.link || '')}" placeholder="https://…"></label>
+    <label class="campo">Checklist (um item por linha)<textarea name="checklist" rows="3" placeholder="Ex.:&#10;Pedir material&#10;Agendar equipe">${esc((it.checklist || []).map(c => c.t).join('\n'))}</textarea></label>
+    <label class="campo">Observação<textarea name="obs" rows="2">${esc(it.obs || '')}</textarea></label>
+    <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${novo ? '' : `<button class="btn perigo" type="button" data-a="excluirItem" data-id="${it.id}">Excluir</button>`}</div>
+  </form>`);
+  ajustarFormItem();
+}
+function ajustarFormItem() {
+  const f = document.querySelector('form[data-form=item]'); if (!f) return;
+  const tipo = f.querySelector('input[name=tipo]:checked')?.value || 'tarefa';
+  const area = f.querySelector('input[name=area]:checked')?.value;
+  f.querySelectorAll('[data-so]').forEach(el => el.classList.toggle('oculto', !el.dataset.so.split(' ').includes(tipo)));
+  f.querySelectorAll('[data-area]').forEach(el => el.classList.toggle('oculto', el.dataset.area !== area));
+  f.querySelector('[data-rot=data]').textContent = { tarefa: 'Prazo (data limite, opcional)', prazo: 'Data do prazo', mensagem: 'Quando mandar', compromisso: 'Data' }[tipo];
+}
+function salvarFormItem(f) {
+  const d = dadosForm(f); const id = f.dataset.id;
+  const antigo = id ? S.db.itens.find(x => x.id === id) : null;
+  const linhas = (d.checklist || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const velho = antigo?.checklist || [];
+  const it = {
+    ...(antigo || { id: uid(), criado: new Date().toISOString(), historico: [] }),
+    titulo: d.titulo.trim(), tipo: d.tipo, area: d.area, prioridade: d.prioridade,
+    data: d.data || null, hora: d.hora || null,
+    planejado: (d.tipo === 'tarefa' || d.tipo === 'prazo') ? (d.planejado || null) : null,
+    horas: d.tipo === 'mensagem' ? 0 : num(d.horas),
+    repeticao: d.repeticao, avisoAntes: (d.tipo === 'prazo' || d.tipo === 'tarefa') ? +d.avisoAntes : 0,
+    contatoId: d.contatoId || null, mensagem: d.tipo === 'mensagem' ? d.mensagem : (antigo?.mensagem || ''),
+    projetoId: d.area === 'trabalho' ? (d.projetoId || null) : null,
+    link: d.link || '', obs: d.obs || '',
+    checklist: linhas.map(t => ({ t, ok: !!velho.find(c => c.t === t && c.ok) }))
+  };
+  if (it.planejado && it.planejado === it.data) it.planejado = null;
+  salvar('itens', it); fecharModal(); toast('Salvo');
+}
+
+/* ===================== Detalhe do item ===================== */
+function verItem(id) {
+  const it = S.db.itens.find(x => x.id === id); if (!it) return;
+  const c = contato(it.contatoId), p = projeto(it.projetoId); const ab = abaDe(it);
+  const g = S.db.gastos.filter(x => x.itemId === it.id);
+  const L = (r, v) => v ? `<div class="det-linha"><span style="min-width:110px">${r}</span><b>${v}</b></div>` : '';
+  abrirModal(`${cab(esc(it.titulo))}
+    <div style="margin:-6px 0 10px"><span class="tag ${ab}">${ab === 'trabalho' ? 'Trabalho' : 'Pessoal'}</span> <span class="tag">${TIPOS[it.tipo]?.n}</span> ${it.prioridade ? `<span class="tag"><span class="pd pd-${it.prioridade}"></span>${PRIOS[it.prioridade]}</span>` : ''} ${it.feito ? '<span class="tag" style="background:var(--verde-claro);color:var(--verde)">Feito</span>' : atrasado(it) ? '<span class="tag" style="background:var(--verm-claro);color:var(--verm)">Atrasado</span>' : ''}</div>
+    ${L(it.tipo === 'tarefa' ? 'Prazo' : 'Data', it.data ? fdia(it.data) + '/' + it.data.slice(0, 4) + (it.hora ? ' às ' + esc(it.hora) : '') : '')}
+    ${L('Fazer em', it.planejado ? fdia(it.planejado) : '')}
+    ${L('Área', AREAS[it.area])}
+    ${L('Tempo estimado', num(it.horas) ? fh(it.horas) : '')}
+    ${L('Repetição', it.repeticao && it.repeticao !== 'nenhuma' ? REPS[it.repeticao] : '')}
+    ${L('Aviso', num(it.avisoAntes) ? it.avisoAntes + ' dia(s) antes' : '')}
+    ${L('Projeto', p ? `<a href="#" data-a="abrirProjeto" data-id="${p.id}">${esc(p.nome)}</a>` : '')}
+    ${L('Contato', c ? esc(c.nome) + (c.telefone ? ' · ' + esc(c.telefone) : '') : '')}
+    ${L('Link', it.link ? `<a href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.link.length > 40 ? it.link.slice(0, 40) + '…' : it.link)}</a>` : '')}
+    ${L('Adiado', it.adiamentos ? it.adiamentos + ' vez(es)' : '')}
+    ${L('Feito em', it.feito ? fdata(it.diaFeito || it.feitoEm?.slice(0, 10)) : '')}
+    ${g.map(x => L('Gasto ligado', `<a href="#" data-a="verGasto" data-id="${x.id}">${esc(x.nome)}${x.valor ? ' — ' + brl(x.valor) : ''}</a>`)).join('')}
+    ${it.obs ? `<div class="alerta info" style="white-space:pre-wrap">${esc(it.obs)}</div>` : ''}
+    ${it.mensagem ? `<div class="alerta info" style="white-space:pre-wrap">💬 ${esc(it.mensagem)}</div>` : ''}
+    ${it.checklist?.length ? `<div class="grupo-dia" style="margin-top:12px">Checklist</div>${it.checklist.map((x, i) => `<label class="check-linha ${x.ok ? 'ok' : ''}"><input type="checkbox" data-a="chk" data-id="${it.id}" data-i="${i}" ${x.ok ? 'checked' : ''}><span class="txt">${esc(x.t)}</span></label>`).join('')}` : ''}
+    ${it.feito ? `<form data-form="horasReais" data-id="${it.id}" style="display:flex;gap:8px;align-items:flex-end;margin-top:10px"><label class="campo" style="flex:1;margin:0">Horas que realmente gastei<input type="number" step="0.25" min="0" name="h" value="${it.horasReais ?? ''}"></label><button class="btn" type="submit">Salvar</button></form>` : ''}
+    <div class="linha-btns col" style="margin-top:16px">
+      ${c && c.telefone ? `<a class="btn wa" href="${waLink(c.telefone, it.mensagem)}" target="_blank" rel="noopener">Abrir WhatsApp de ${esc(c.nome)}</a>` : ''}
+      ${it.feito ? `<button class="btn" data-a="desfeito" data-id="${it.id}">Desmarcar (voltar para pendente)</button>`
+      : `<button class="btn ok" data-a="feitoFechar" data-id="${it.id}">✓ Marcar como feito</button>
+         <div class="linha-btns"><button class="btn" style="flex:1" data-a="adiar" data-id="${it.id}">Adiar</button><button class="btn" style="flex:1" data-a="naoConsegui" data-id="${it.id}">Não consegui</button></div>`}
+      <div class="linha-btns"><button class="btn" style="flex:1" data-a="editarItem" data-id="${it.id}">Editar</button><button class="btn perigo" style="flex:1" data-a="excluirItem" data-id="${it.id}">Excluir</button></div>
+    </div>`);
+}
+
+/* ---------- Adiar ---------- */
+function adiar(id) {
+  const it = S.db.itens.find(x => x.id === id); const h = hoje();
+  const base = dia(it) && dia(it) > h ? dia(it) : h;
+  const amanha = addDias(h, 1); const semana = addDias(segundaDe(h), 7);
+  abrirModal(`${cab('Adiar')}<p style="margin-top:0;color:var(--txt2)">${esc(it.titulo)}${dia(it) ? ' · hoje está em ' + fdia(dia(it)) : ''}</p>
+  <div class="linha-btns col">
+    <button class="btn pri" data-a="adiarPara" data-id="${id}" data-v="${amanha}">Amanhã (${fdia(amanha)})</button>
+    <button class="btn" data-a="adiarPara" data-id="${id}" data-v="${semana}">Semana que vem (${fdia(semana)})</button>
+    ${base !== h ? `<button class="btn" data-a="adiarPara" data-id="${id}" data-v="${addDias(base, 1)}">+1 dia (${fdia(addDias(base, 1))})</button>` : ''}
+    <form data-form="adiarData" data-id="${id}" style="display:flex;gap:8px"><input class="inp" type="date" name="d" required min="${h}" style="flex:1;margin:0"><button class="btn" type="submit">Mover</button></form>
+  </div>`);
+}
+function aplicarAdiar(id, d) {
+  const it = S.db.itens.find(x => x.id === id);
+  const aviso = it.data && d > it.data && it.planejado ? ` Atenção: fica depois do prazo (${fdia(it.data)}).` : '';
+  moverItem(it, d, 'adiado'); render(); fecharModal(); toast(`Adiado para ${frel(d)}.${aviso}`, aviso ? 4500 : 2600);
+}
+
+/* ===================== PLANEJADOR ===================== */
+const fl = x => Math.floor(x * 2 + 1e-9) / 2; // arredonda para baixo em meias horas
+const ce = x => Math.ceil(x * 2 - 1e-9) / 2;
+
+// "Não consegui": dias com espaço ANTES do prazo
+function sugestoes(it) {
+  const h = num(it.horas); const ini = addDias(hoje(), 1);
+  let lim = it.data ? it.data : addDias(ini, 30);
+  const semPrazo = !it.data;
+  if (lim < ini) return { h, vencido: true, cabem: [], livre: {}, total: 0, lim };
+  const livre = livreMapa(ini, lim, new Set([it.id]));
+  const dias = Object.keys(livre).sort();
+  const cabem = dias.filter(d => livre[d] >= h - 1e-9).slice(0, 6);
+  const total = dias.reduce((s, d) => s + Math.max(0, fl(livre[d])), 0);
+  return { h, cabem, livre, dias, total, lim, semPrazo };
+}
+function naoConsegui(id) {
+  const it = S.db.itens.find(x => x.id === id); const s = sugestoes(it);
+  let html = `${cab('Não consegui — replanejar')}<p style="margin-top:0;color:var(--txt2)"><b>${esc(it.titulo)}</b> · ${s.h ? fh(s.h) : 'sem tempo estimado'}${it.data ? ' · prazo ' + fdia(it.data) : ' · sem prazo (procurando nos próximos 30 dias)'}</p>`;
+  if (s.vencido) {
+    html += `<div class="alerta verm"><b>O prazo (${fdia(it.data)}) já passou ou é hoje.</b> Não há nenhum dia antes do prazo. Escolha uma nova data (isso muda o prazo) ou fale com quem definiu o prazo.</div>`;
+  } else if (s.cabem.length) {
+    html += `<div class="alerta verde">Estes dias têm espaço livre suficiente${it.data ? ' antes do prazo' : ''}. Toque para aceitar:</div>`;
+    html += s.cabem.map(d => `<div class="sug"><div class="info"><b>${DSEM_LONGO[dsem(d)]}, ${fdm(d)}</b><small>livre ${fh(s.livre[d])} → sobra ${fh(s.livre[d] - s.h)}${d === it.data ? ' · é o dia do prazo' : ''}</small></div><button class="btn pri peq" data-a="moverPara" data-id="${id}" data-v="${d}">Aceitar</button></div>`).join('');
+  } else {
+    html += `<div class="alerta verm"><b>Não cabe inteiro em nenhum dia${it.data ? ' antes do prazo (' + fdia(it.data) + ')' : ' dos próximos 30 dias'}.</b><br>Espaço livre somando todos os dias: ${fh(s.total)} · precisa de ${fh(s.h)}.</div>`;
+    if (s.total >= s.h - 1e-9 && s.h > 0) {
+      const partes = dividir(s, s.h);
+      html += `<div class="alerta amar">Dá para fazer em partes:<br>${partes.map(p => `• ${fdia(p.d)} — ${fh(p.h)}`).join('<br>')}</div><button class="btn pri bloco" data-a="aplicarDivisao" data-id="${id}">Dividir assim</button>`;
+    } else if (s.h > 0) {
+      html += `<div class="alerta verm">Mesmo dividindo, faltam <b>${fh(s.h - s.total)}</b>. Opções: aumentar horas de algum dia, reduzir o tempo estimado, ou negociar o prazo.</div>`;
+    }
+    const melhor = (s.dias || []).slice().sort((a, b) => s.livre[b] - s.livre[a])[0];
+    if (melhor) html += `<button class="btn bloco" style="margin-top:8px" data-a="moverPara" data-id="${id}" data-v="${melhor}">Colocar mesmo assim no dia mais livre (${fdia(melhor)})</button>`;
+  }
+  html += `<form data-form="adiarData" data-id="${id}" style="display:flex;gap:8px;margin-top:14px"><input class="inp" type="date" name="d" required min="${hoje()}" style="flex:1;margin:0"><button class="btn" type="submit">Escolher data</button></form>`;
+  abrirModal(html);
+}
+function dividir(s, h) {
+  const partes = []; let resto = h;
+  for (const d of s.dias) { if (resto <= 1e-9) break; const liv = fl(Math.max(0, s.livre[d])); if (liv < 0.5) continue; const x = Math.min(liv, resto); partes.push({ d, h: x }); resto -= x; }
+  return partes;
+}
+function aplicarDivisao(id) {
+  const it = S.db.itens.find(x => x.id === id); const s = sugestoes(it); const partes = dividir(s, s.h); const n = partes.length;
+  const serie = it.id; const base = it.titulo.replace(/ \(parte \d+\/\d+\)$/, '');
+  partes.forEach((p, i) => {
+    const o = i === 0 ? { ...it } : { ...it, id: uid(), checklist: [], historico: [], adiamentos: 0, criado: new Date().toISOString() };
+    o.titulo = `${base} (parte ${i + 1}/${n})`; o.horas = p.h; o.planejado = p.d; o.divisao = serie;
+    if (i === 0) o.historico = [...(it.historico || []), { de: dia(it), para: p.d, em: hoje(), tipo: 'nao-consegui' }];
+    if (!o.data) o.data = null;
+    if (o.data === o.planejado) o.planejado = null;
+    salvar('itens', o, true);
+  });
+  render(); fecharModal(); toast(`Dividido em ${n} partes.`);
+}
+
+// distribui um conjunto de itens nos próximos dias, respeitando horas livres e prazos
+function planejarLote(itens, ini) {
+  const fim = addDias(ini, 60); const ex = new Set(itens.map(i => i.id));
+  const livre = livreMapa(ini, fim, ex);
+  const ord = itens.slice().sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999') || (PESO_PRIO[a.prioridade] ?? 1) - (PESO_PRIO[b.prioridade] ?? 1) || num(b.horas) - num(a.horas));
+  const res = ord.map(it => {
+    const h = num(it.horas);
+    const temPrazo = (it.tipo === 'tarefa' || it.tipo === 'prazo') && it.data; // mensagem/compromisso: a data é "quando", não um prazo
+    if (temPrazo && it.data < ini) return { it, d: null, motivo: it.data === hoje() ? 'o prazo vence hoje' : `o prazo (${fdia(it.data)}) já passou` };
+    const lim = temPrazo ? it.data : fim;
+    for (let d = ini; d <= lim; d = addDias(d, 1)) if (livre[d] >= h - 1e-9) { livre[d] -= h; return { it, d }; }
+    return { it, d: null, motivo: `não cabe antes do prazo (${fdia(lim)})` };
+  });
+  // sugestão "mesmo assim": dia mais livre nas próximas 2 semanas (mudando o prazo se preciso)
+  for (const p of res) if (!p.d) { let m = null; for (let d = ini; d <= addDias(ini, 13); d = addDias(d, 1)) if (m === null || livre[d] > livre[m] + 1e-9) m = d; p.forcar = m; livre[m] -= num(p.it.horas); }
+  return res;
+}
+function previaLote(itens, ini, titulo, intro) {
+  const plano = planejarLote(itens, ini); S.tmp.lote = plano;
+  const ok = plano.filter(p => p.d), nao = plano.filter(p => !p.d);
+  abrirModal(`${cab(titulo)}${intro ? `<p style="margin-top:0;color:var(--txt2)">${intro}</p>` : ''}
+    ${ok.length ? `<table class="tab"><tr><th>Item</th><th>Horas</th><th>Novo dia</th></tr>${ok.map(p => `<tr><td>${esc(p.it.titulo)}</td><td>${num(p.it.horas) ? fh(p.it.horas) : '—'}</td><td><b>${fdia(p.d)}</b></td></tr>`).join('')}</table>` : ''}
+    ${nao.length ? `<div class="alerta verm"><b>${nao.length} item(ns) não couberam antes do prazo:</b><br>${nao.map(p => `• ${esc(p.it.titulo)} (${fh(p.it.horas)}) — ${p.motivo}`).join('<br>')}</div>
+      <label class="check-linha"><input type="checkbox" id="forcar"><span class="txt">Mover esses também para o dia mais livre, mesmo passando do prazo/da capacidade (${nao.map(p => fdia(p.forcar)).join(', ')})</span></label>
+      <p class="vazio">Se deixar desmarcado, eles ficam onde estão — use “Não consegui” neles para dividir em partes ou escolher outra data.</p>` : ''}
+    ${!plano.length ? '<div class="vazio">Nada para replanejar. 👏</div>' : ''}
+    <div class="linha-btns" style="margin-top:12px">${plano.length ? `<button class="btn pri" style="flex:1" data-a="aplicarLote">Aplicar</button>` : ''}<button class="btn" data-a="fechar">Cancelar</button></div>`);
+}
+function aplicarLote() {
+  const plano = S.tmp.lote || []; let n = 0; const forcar = $('#forcar')?.checked;
+  for (const p of plano) { if (!p.d && forcar) p.d = p.forcar; }
+  for (const p of plano) if (p.d) { const it = S.db.itens.find(x => x.id === p.it.id); if (it) { moverOuPlanejar(it, p.d); n++; } }
+  render(); fecharModal(); toast(`${n} item(ns) replanejado(s).`);
+}
+function moverOuPlanejar(it, d) {
+  // para tarefas com prazo, define o "fazer em"; para o resto, move a data
+  if ((it.tipo === 'tarefa' || it.tipo === 'prazo') && it.data && d <= it.data) {
+    salvar('itens', { ...it, planejado: d === it.data ? null : d, historico: [...(it.historico || []), { de: dia(it), para: d, em: hoje(), tipo: 'replanejado' }], adiamentos: (it.adiamentos || 0) + (dia(it) && dia(it) < d ? 1 : 0) }, true);
+  } else moverItem(it, d, 'replanejado');
+}
+const pendentesRevisao = () => itensVis().filter(it => !it.feito && dia(it) && dia(it) <= hoje());
+
+VIEWS.revisao = () => {
+  const ps = ordenar(pendentesRevisao());
+  return `<h2 class="tit"><button class="icone-btn" data-a="ir" data-v="planejador">‹</button> O que ficou pendente? <span class="sub">${nomeAba()}</span></h2>
+  <div class="card"><p style="margin-top:0">Revise o dia: marque o que fez, e o que não deu, replaneje.</p>
+  <button class="btn pri bloco" data-a="replanejarTudo" ${ps.length ? '' : 'disabled'}>Replanejar tudo de uma vez (${ps.length})</button></div>
+  <div class="card">${ps.length ? ps.map(it => `${cardItem(it, { mostrarData: true })}<div class="linha-btns" style="padding:0 0 10px 40px"><button class="btn ok peq" data-a="feito" data-id="${it.id}">Fiz</button><button class="btn peq" data-a="naoConsegui" data-id="${it.id}">Não consegui</button><button class="btn peq" data-a="adiarPara" data-id="${it.id}" data-v="${addDias(hoje(), 1)}">Amanhã</button></div>`).join('') : '<div class="vazio">Nada pendente. Dia fechado! 🎉</div>'}</div>`;
+};
+
+VIEWS.planejador = () => {
+  const h = hoje(); const fim = addDias(h, 13); const carga = cargaMapa(h, fim);
+  const seg = segundaDe(h), dom = addDias(seg, 6); const cs = cargaMapa(seg, dom);
+  let planSem = 0, dispSem = 0; for (let d = seg; d <= dom; d = addDias(d, 1)) { planSem += cs[d]?.t || 0; dispSem += disponivel(d); }
+  const estourados = []; for (let d = h; d <= fim; d = addDias(d, 1)) if ((carga[d]?.t || 0) > disponivel(d) + 1e-9) estourados.push(d);
+  const aPlanejar = itensVis().filter(it => !it.feito && (it.tipo === 'tarefa' || it.tipo === 'prazo') && num(it.horas) > 0 && !it.planejado && (!it.data || it.data >= h));
+  const pend = pendentesRevisao().length;
+  let html = `<h2 class="tit">Planejador <span class="sub">horas livres são compartilhadas entre Pessoal e Trabalho</span></h2>
+  <div class="kpis"><div class="kpi"><div class="v" style="color:${planSem > dispSem ? 'var(--verm)' : 'inherit'}">${fh(planSem)}</div><div class="l">planejadas nesta semana de ${fh(dispSem)}</div></div>
+  <div class="kpi"><div class="v" style="color:${estourados.length ? 'var(--verm)' : 'var(--verde)'}">${estourados.length}</div><div class="l">dia(s) estourado(s) em 14 dias</div></div>
+  <div class="kpi"><div class="v">${aPlanejar.length}</div><div class="l">tarefa(s) sem dia planejado</div></div>
+  <div class="kpi"><div class="v" style="color:${pend ? 'var(--verm)' : 'inherit'}">${pend}</div><div class="l">pendente(s) de hoje/atrás</div></div></div>
+  <div class="linha-btns" style="margin-bottom:14px"><button class="btn pri" data-a="revisao">Revisão do dia</button><button class="btn" data-a="novaMeta">🎯 Meta para prova</button><button class="btn" data-a="ir" data-v="resumo">Resumo da semana</button><button class="btn" data-a="ir" data-v="ajustes">Minhas horas</button></div>`;
+  if (estourados.length) html += `<div class="alerta verm">Dias com mais do que cabe: ${estourados.map(d => `<a href="#" data-a="diaPlan" data-v="${d}">${fdia(d)}</a>`).join(', ')}. Toque no dia e use “Não consegui” nos itens de menor prioridade.</div>`;
+  html += `<div class="card"><h3>Próximos 14 dias <span class="cont">${AJ().folga}% de folga</span></h3>`;
+  for (let d = h; d <= fim; d = addDias(d, 1)) {
+    const cheio = (carga[d]?.t || 0) > disponivel(d) + 1e-9;
+    html += `<div class="dia-plan ${d === h ? 'hoje' : ''} ${cheio ? 'excedido' : ''}" data-a="diaPlan" data-v="${d}"><div class="dn">${d === h ? 'Hoje' : DSEM[dsem(d)]}<small>${fdm(d)}</small></div><div>${barraDia(d, carga)}</div></div>`;
+  }
+  html += `</div>`;
+  html += `<div class="card"><h3>Tarefas sem dia planejado <span class="cont">${aPlanejar.length}</span></h3>${lista(ordenar(aPlanejar), { mostrarData: true, vazio: 'Todas as tarefas com tempo estimado já têm dia.' })}
+    ${aPlanejar.length ? `<button class="btn pri bloco" style="margin-top:10px" data-a="encaixar">Planejar automaticamente</button>` : ''}</div>
+    <p class="vazio">Regras usadas: o sistema ocupa primeiro os dias mais próximos com espaço, nunca passa do prazo, respeita as horas livres de cada dia menos a folga, e ordena por prazo → prioridade → tamanho.</p>`;
+  return html;
+};
+function diaPlan(d) {
+  const xs = itensDoDia(d).filter(x => !x.prazoAqui);
+  abrirModal(`${cab(DSEM_LONGO[dsem(d)] + ', ' + fdata(d))}${barraDia(d, cargaMapa(d, d))}
+    <div style="margin-top:8px">${xs.length ? xs.map(x => cardItem(x.it, { virtual: x.virtual }) + (!x.it.feito && !x.virtual ? `<div class="linha-btns" style="padding:0 0 8px 40px"><button class="btn peq" data-a="naoConsegui" data-id="${x.it.id}">Não consegui / mover</button></div>` : '')).join('') : '<div class="vazio">Nada planejado.</div>'}</div>
+    <div class="linha-btns" style="margin-top:12px"><button class="btn pri" data-a="novo" data-dia="${d}">+ Item neste dia</button><button class="btn" data-a="horasDia" data-v="${d}">Horas deste dia</button></div>`);
+}
+function horasDia(d) {
+  const a = AJ(); const temExc = a.excecoes[d] != null;
+  abrirModal(`${cab('Horas livres em ' + fdia(d))}
+  <form data-form="horasDia" data-v="${d}"><label class="campo">Horas livres neste dia (padrão de ${DSEM_LONGO[dsem(d)].toLowerCase()}: ${fh(a.semana[dsem(d)])})<input type="number" step="0.5" min="0" max="24" name="h" value="${horasLivres(d)}" required></label>
+  <p class="vazio">Descontando ${a.folga}% de folga, sobram ${fh(disponivel(d))} para planejar.</p>
+  <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${temExc ? `<button class="btn" type="button" data-a="removerExc" data-v="${d}">Voltar ao padrão</button>` : ''}</div></form>`);
+}
+
+/* ---------- Meta para prova ---------- */
+function linhaAssunto(a = {}) { return `<div class="assunto-linha"><input class="inp" name="an" placeholder="Assunto" value="${esc(a.nome || '')}" style="margin:0"><input class="inp" name="ah" type="number" step="0.5" min="0.5" placeholder="Horas" value="${a.horas ?? ''}" style="margin:0"><button type="button" class="icone-btn" data-a="remAssunto" style="height:46px;width:44px">✕</button></div>`; }
+function novaMeta(meta) {
+  const m = meta || { nome: '', dataProva: addDias(hoje(), 14), inicio: hoje(), bloco: 2, area: 'estudo', assuntos: [{}, {}, {}] };
+  abrirModal(`${cab(meta ? 'Replanejar meta' : '🎯 Meta para prova')}
+  <form data-form="meta" data-id="${meta?.id || ''}">
+    <label class="campo">Nome da prova<input name="nome" required value="${esc(m.nome)}" placeholder="Ex.: P2 Circuitos Elétricos"></label>
+    <div class="campos2"><label class="campo">Data da prova<input type="date" name="dataProva" required value="${m.dataProva}" min="${addDias(hoje(), 1)}"></label>
+    <label class="campo">Começar a estudar em<input type="date" name="inicio" required value="${m.inicio < hoje() ? hoje() : m.inicio}" min="${hoje()}"></label></div>
+    <label class="campo">Máximo de horas do mesmo assunto por dia<input type="number" step="0.5" min="0.5" name="bloco" value="${m.bloco}"></label>
+    <div class="grupo-dia">Assuntos e horas de estudo</div>
+    <div id="assuntos">${m.assuntos.map(linhaAssunto).join('')}</div>
+    <button type="button" class="btn peq" data-a="addAssunto" style="margin-bottom:12px">+ Assunto</button>
+    <div id="previa-meta"></div>
+    <div class="linha-btns"><button class="btn" type="submit" style="flex:1">Calcular distribuição</button></div>
+  </form>`);
+}
+function lerMeta(f) {
+  const d = dadosForm(f); const nomes = [...f.querySelectorAll('[name=an]')].map(x => x.value.trim()); const hs = [...f.querySelectorAll('[name=ah]')].map(x => num(x.value));
+  const assuntos = nomes.map((n, i) => ({ nome: n, horas: hs[i] })).filter(a => a.nome && a.horas > 0);
+  return { id: f.dataset.id || uid(), nome: d.nome.trim(), dataProva: d.dataProva, inicio: d.inicio, bloco: Math.max(0.5, num(d.bloco) || 2), area: 'estudo', assuntos };
+}
+function distribuirMeta(meta, excluirIds) {
+  const ini = meta.inicio < hoje() ? hoje() : meta.inicio; const fim = addDias(meta.dataProva, -1);
+  if (fim < ini) return { erro: 'A prova precisa ser pelo menos um dia depois do início dos estudos.' };
+  if (!meta.assuntos.length) return { erro: 'Informe pelo menos um assunto com horas.' };
+  const livre = livreMapa(ini, fim, excluirIds); const dias = Object.keys(livre).sort();
+  const totalLivre = dias.reduce((s, d) => s + Math.max(0, fl(livre[d])), 0);
+  const rest = meta.assuntos.map(a => num(a.horas)); const total = rest.reduce((s, x) => s + x, 0);
+  const plano = []; let ptr = 0; const n = rest.length;
+  const passada = r => {
+    for (const d of dias) {
+      const cap = Math.min(fl(Math.max(0, livre[d])), ce(Math.max(0, livre[d]) * r)); let usado = 0; const hojeUsados = new Set();
+      while (true) {
+        if (!rest.some(x => x > 1e-9)) break;
+        let k = -1;
+        for (let j = 0; j < n; j++) { const c = (ptr + j) % n; if (rest[c] > 1e-9 && !hojeUsados.has(c)) { k = c; break; } }
+        if (k < 0) for (let j = 0; j < n; j++) { const c = (ptr + j) % n; if (rest[c] > 1e-9) { k = c; break; } }
+        const esp = cap - usado; if (esp < Math.min(0.5, rest[k]) - 1e-9) break;
+        const ja = plano.filter(p => p.d === d && p.k === k).reduce((s, p) => s + p.h, 0);
+        const blk = Math.min(meta.bloco - ja, rest[k], esp >= 0.5 ? fl(esp) : esp);
+        if (blk <= 1e-9) { hojeUsados.add(k); if ([...Array(n).keys()].every(c => rest[c] <= 1e-9 || hojeUsados.has(c))) break; continue; }
+        plano.push({ d, k, h: blk }); rest[k] -= blk; usado += blk; hojeUsados.add(k); ptr = k + 1;
+      }
+      livre[d] -= usado;
+    }
+  };
+  passada(total >= totalLivre ? 1 : total / totalLivre);
+  if (rest.some(x => x > 1e-9)) passada(1);
+  // junta blocos do mesmo assunto no mesmo dia
+  const j = {}; for (const p of plano) { const ch = p.d + '|' + p.k; j[ch] = j[ch] ? { ...j[ch], h: j[ch].h + p.h } : { ...p }; }
+  const final = Object.values(j).sort((a, b) => a.d.localeCompare(b.d) || a.k - b.k);
+  return { plano: final, falta: rest.reduce((s, x) => s + Math.max(0, x), 0), total, totalLivre, ini, fim };
+}
+function previaMeta(f) {
+  const meta = lerMeta(f); const ex = new Set(S.db.itens.filter(i => i.metaId === meta.id && !i.feito).map(i => i.id));
+  const r = distribuirMeta(meta, ex); const box = $('#previa-meta');
+  if (r.erro) { box.innerHTML = `<div class="alerta verm">${r.erro}</div>`; return; }
+  S.tmp.meta = { meta, r, ex };
+  const porDia = {}; for (const p of r.plano) (porDia[p.d] || (porDia[p.d] = [])).push(p);
+  box.innerHTML = `<div class="alerta ${r.falta > 1e-9 ? 'verm' : 'verde'}">${r.falta > 1e-9 ? `<b>Não cabe tudo antes da prova.</b> Faltam ${fh(r.falta)} — você tem ${fh(r.totalLivre)} livres de ${fdm(r.ini)} a ${fdm(r.fim)} e precisa de ${fh(r.total)}. Aumente as horas de alguns dias, comece antes ou reduza as horas dos assuntos.` : `Cabe! ${fh(r.total)} de estudo distribuídas em ${Object.keys(porDia).length} dia(s), com ${fh(r.totalLivre - r.total)} de sobra.`}</div>
+  <table class="tab" style="margin-bottom:12px"><tr><th>Dia</th><th>Estudar</th></tr>${Object.entries(porDia).map(([d, ps]) => `<tr><td style="white-space:nowrap"><b>${fdia(d)}</b></td><td>${ps.map(p => `${esc(meta.assuntos[p.k].nome)} (${fh(p.h)})`).join(' · ')}</td></tr>`).join('')}</table>
+  ${r.plano.length ? `<button type="button" class="btn pri bloco" data-a="confirmarMeta" style="margin-bottom:10px">Confirmar e criar ${r.plano.length} sessões de estudo</button>` : ''}`;
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function confirmarMeta() {
+  const { meta, r, ex } = S.tmp.meta; if (!r) return;
+  const antigos = [...ex]; if (antigos.length) excluir('itens', antigos);
+  const existente = S.db.metas.find(m => m.id === meta.id);
+  salvar('metas', { ...(existente || {}), ...meta, criado: existente?.criado || new Date().toISOString() }, true);
+  const novos = r.plano.map(p => ({ id: uid(), titulo: `${meta.assuntos[p.k].nome} — ${meta.nome}`, tipo: 'tarefa', area: 'estudo', prioridade: 'alta', data: addDias(meta.dataProva, -1), planejado: p.d === addDias(meta.dataProva, -1) ? null : p.d, horas: p.h, repeticao: 'nenhuma', metaId: meta.id, assunto: meta.assuntos[p.k].nome, criado: new Date().toISOString(), historico: [], checklist: [] }));
+  if (!S.db.itens.some(i => i.metaId === meta.id && i.provaDe)) novos.push({ id: uid(), titulo: `Prova: ${meta.nome}`, tipo: 'compromisso', area: 'estudo', prioridade: 'alta', data: meta.dataProva, horas: 0, repeticao: 'nenhuma', avisoAntes: 3, metaId: meta.id, provaDe: true, criado: new Date().toISOString(), historico: [], checklist: [] });
+  else { const pv = S.db.itens.find(i => i.metaId === meta.id && i.provaDe); salvar('itens', { ...pv, data: meta.dataProva, titulo: `Prova: ${meta.nome}` }, true); }
+  salvarVarios('itens', novos); fecharModal(); S.view = 'metas'; render(); toast('Plano de estudo criado!');
+}
+VIEWS.metas = () => {
+  const ms = S.db.metas.slice().sort((a, b) => a.dataProva.localeCompare(b.dataProva));
+  return `<h2 class="tit">Metas de prova<button class="btn peq pri" data-a="novaMeta" style="margin-left:auto">+ Meta</button></h2>` + (ms.length ? ms.map(m => {
+    const its = S.db.itens.filter(i => i.metaId === m.id && !i.provaDe); const tot = its.reduce((s, i) => s + num(i.horas), 0);
+    const feitas = its.filter(i => i.feito).reduce((s, i) => s + num(i.horas), 0); const atr = its.filter(atrasado).length;
+    const faltam = diff(hoje(), m.dataProva); const pct = tot ? Math.round(feitas / tot * 100) : 0;
+    return `<div class="card"><h3>🎯 ${esc(m.nome)} <span class="cont">${faltam > 0 ? 'em ' + faltam + ' dia(s)' : faltam === 0 ? 'HOJE' : 'passou'}</span></h3>
+    <div class="det-linha">Prova: <b>${fdia(m.dataProva)}/${m.dataProva.slice(0, 4)}</b></div>
+    <div class="barra-wrap"><div class="barra"><span class="seg-pessoal" style="width:${pct}%;background:var(--verde)"></span></div><div class="barra-txt"><span>${fh(feitas)} de ${fh(tot)} estudadas (${pct}%)</span><span class="${atr ? 'over' : ''}">${atr ? atr + ' sessão(ões) atrasada(s)' : ''}</span></div></div>
+    <div class="grupo-dia">Assuntos</div>${m.assuntos.map(a => { const ia = its.filter(i => i.assunto === a.nome); const f = ia.filter(i => i.feito).reduce((s, i) => s + num(i.horas), 0); return `<div class="det-linha"><span style="flex:1">${esc(a.nome)}</span><b>${fh(f)} / ${fh(ia.reduce((s, i) => s + num(i.horas), 0))}</b></div>`; }).join('')}
+    <div class="linha-btns" style="margin-top:10px"><button class="btn peq" data-a="redistMeta" data-id="${m.id}">Redistribuir o que falta</button><button class="btn peq perigo" data-a="excluirMeta" data-id="${m.id}">Excluir meta</button></div></div>`;
+  }).join('') : `<div class="card vazio">Informe a data da prova e os assuntos com as horas de cada um; o sistema distribui as sessões de estudo nos dias anteriores, respeitando suas horas livres.</div>`);
+};
+function redistMeta(id) {
+  const m = S.db.metas.find(x => x.id === id);
+  const pend = S.db.itens.filter(i => i.metaId === id && !i.feito && !i.provaDe);
+  const assuntos = m.assuntos.map(a => ({ nome: a.nome, horas: pend.filter(i => i.assunto === a.nome).reduce((s, i) => s + num(i.horas), 0) })).filter(a => a.horas > 0);
+  novaMeta({ ...m, inicio: hoje(), assuntos: assuntos.length ? assuntos : [{}] });
+}
+
+/* ---------- Resumo da semana ---------- */
+VIEWS.resumo = () => {
+  const ini = segundaDe(S.semanaRef), fim = addDias(ini, 6); const h = hoje();
+  const its = itensVis(); const dentro = d => d && d >= ini && d <= fim;
+  const feitos = its.filter(i => i.feito && dentro(i.diaFeito || (i.feitoEm || '').slice(0, 10)));
+  const adiados = its.filter(i => (i.historico || []).some(x => dentro(x.em) && (x.tipo === 'adiado' || x.tipo === 'nao-consegui' || x.tipo === 'replanejado') && x.para > (x.de || '')));
+  const planejadosSet = new Map();
+  for (const i of its) { if (!num(i.horas)) continue; if (dentro(dia(i))) planejadosSet.set(i.id, i); if ((i.historico || []).some(x => dentro(x.de))) planejadosSet.set(i.id, i); }
+  const hPlan = [...planejadosSet.values()].reduce((s, i) => s + num(i.horas), 0);
+  const hReal = feitos.reduce((s, i) => s + num(i.horasReais ?? i.horas), 0);
+  const pend = its.filter(i => !i.feito && dentro(dia(i)) && dia(i) <= h);
+  let dispSem = 0; for (let d = ini; d <= fim; d = addDias(d, 1)) dispSem += disponivel(d);
+  const porArea = {}; for (const i of feitos) porArea[i.area] = (porArea[i.area] || 0) + num(i.horasReais ?? i.horas);
+  const taxa = feitos.length + pend.length ? Math.round(feitos.length / (feitos.length + pend.length) * 100) : 0;
+  let html = `<h2 class="tit">Resumo da semana <span class="sub">${nomeAba()}</span></h2>
+  <div class="cal-top"><button class="icone-btn" data-a="semNav" data-v="-7">‹</button><div class="mes">${fdm(ini)} – ${fdm(fim)}</div><button class="icone-btn" data-a="semNav" data-v="7">›</button></div>
+  <div class="kpis"><div class="kpi"><div class="v" style="color:var(--verde)">${feitos.length}</div><div class="l">feitos</div></div><div class="kpi"><div class="v" style="color:var(--amar)">${adiados.length}</div><div class="l">adiados / replanejados</div></div>
+  <div class="kpi"><div class="v">${fh(hReal)} <small style="font-size:.9rem;color:var(--txt2)">/ ${fh(hPlan)}</small></div><div class="l">realizadas / planejadas</div></div><div class="kpi"><div class="v">${taxa}%</div><div class="l">do que venceu foi feito</div></div></div>
+  <div class="card"><h3>Horas por dia</h3><table class="tab"><tr><th>Dia</th><th class="num">Disponível</th><th class="num">Planejado</th><th class="num">Realizado</th></tr>`;
+  for (let d = ini; d <= fim; d = addDias(d, 1)) {
+    const p = its.filter(i => num(i.horas) && dia(i) === d).reduce((s, i) => s + num(i.horas), 0);
+    const r = feitos.filter(i => (i.diaFeito || (i.feitoEm || '').slice(0, 10)) === d).reduce((s, i) => s + num(i.horasReais ?? i.horas), 0);
+    html += `<tr><td>${fdia(d)}</td><td class="num">${fh(disponivel(d))}</td><td class="num" style="color:${p > disponivel(d) + 1e-9 ? 'var(--verm)' : 'inherit'}">${fh(p)}</td><td class="num">${fh(r)}</td></tr>`;
+  }
+  html += `<tr><th>Total</th><th class="num">${fh(dispSem)}</th><th class="num">${fh(hPlan)}</th><th class="num">${fh(hReal)}</th></tr></table></div>`;
+  if (Object.keys(porArea).length) html += `<div class="card"><h3>Horas realizadas por área</h3>${Object.entries(porArea).map(([a, v]) => `<div class="det-linha"><span style="flex:1">${AREAS[a] || a}</span><b>${fh(v)}</b></div>`).join('')}</div>`;
+  html += `<div class="grade2"><div class="card"><h3>O que fiz <span class="cont">${feitos.length}</span></h3>${lista(feitos)}</div>
+  <div class="card"><h3>O que adiei <span class="cont">${adiados.length}</span></h3>${adiados.length ? adiados.map(i => cardItem(i, { mostrarData: true })).join('') : '<div class="vazio">Nada adiado.</div>'}</div></div>
+  ${pend.length ? `<div class="card secao-atrasado"><h3>Ficou pendente <span class="cont">${pend.length}</span></h3>${lista(pend, { mostrarData: true })}</div>` : ''}`;
+  return html;
+};
+
+/* ===================== Notas, contatos, projetos, gastos (formulários) ===================== */
+function formNota(n, pre = {}) {
+  const novo = !n; n = n || { data: hoje(), aba: pre.projeto ? 'trabalho' : (S.aba === 'tudo' ? 'pessoal' : S.aba), projetoId: pre.projeto || '', contatoId: pre.contato || '', dia: pre.dia || '' };
+  abrirModal(`${cab(novo ? 'Nova nota' : 'Editar nota')}<form data-form="nota" data-id="${novo ? '' : n.id}">
+    <label class="campo">Título<input name="titulo" value="${esc(n.titulo || '')}" autofocus></label>
+    <label class="campo">Texto<textarea name="texto" rows="7">${esc(n.texto || '')}</textarea></label>
+    <div class="campos2"><label class="campo">Data<input type="date" name="data" value="${n.data || hoje()}"></label>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Aba</span>${chips('aba', { pessoal: 'Pessoal', trabalho: 'Trabalho' }, n.aba || 'pessoal')}</div></div>
+    <label class="campo">Ligar a um projeto<select name="projetoId">${opcoesSel(S.db.projetos.map(p => [p.id, p.nome]), n.projetoId)}</select></label>
+    <label class="campo">Ligar a um contato<select name="contatoId">${opcoesSel(S.db.contatos.map(c => [c.id, c.nome]), n.contatoId)}</select></label>
+    <label class="campo">Ligar a um dia da agenda<input type="date" name="dia" value="${n.dia || ''}"></label>
+    <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${novo ? '' : `<button class="btn perigo" type="button" data-a="excluirNota" data-id="${n.id}">Excluir</button>`}</div></form>`);
+}
+function verNota(id) {
+  const n = S.db.notas.find(x => x.id === id); if (!n) return;
+  abrirModal(`${cab(esc(n.titulo || 'Sem título'))}<div class="vazio" style="margin-top:-8px">${fdata(n.data)}${projeto(n.projetoId) ? ' · ◆ ' + esc(projeto(n.projetoId).nome) : ''}${contato(n.contatoId) ? ' · 👤 ' + esc(contato(n.contatoId).nome) : ''}${n.dia ? ' · 📅 ' + fdia(n.dia) : ''}</div>
+    <div style="white-space:pre-wrap;margin:12px 0 16px;overflow-wrap:anywhere">${esc(n.texto)}</div>
+    <div class="linha-btns"><button class="btn pri" style="flex:1" data-a="editarNota" data-id="${n.id}">Editar</button><button class="btn perigo" data-a="excluirNota" data-id="${n.id}">Excluir</button></div>`);
+}
+function formContato(c) {
+  const novo = !c; c = c || { aba: S.aba === 'tudo' ? 'ambos' : S.aba };
+  abrirModal(`${cab(novo ? 'Novo contato' : 'Editar contato')}<form data-form="contato" data-id="${novo ? '' : c.id}">
+    <label class="campo">Nome<input name="nome" required value="${esc(c.nome || '')}" autofocus></label>
+    <label class="campo">Telefone (com DDD)<input name="telefone" type="tel" inputmode="tel" value="${esc(c.telefone || '')}" placeholder="(22) 99999-9999"></label>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Aparece em</span>${chips('aba', { pessoal: 'Pessoal', trabalho: 'Trabalho', ambos: 'Ambos' }, c.aba || 'ambos')}</div>
+    <label class="campo">Observação<textarea name="obs" rows="2">${esc(c.obs || '')}</textarea></label>
+    <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${novo ? '' : `<button class="btn perigo" type="button" data-a="excluirContato" data-id="${c.id}">Excluir</button>`}</div></form>`);
+}
+function verContato(id) {
+  const c = contato(id); if (!c) return;
+  const its = ordenar(S.db.itens.filter(i => i.contatoId === id && !i.feito)); const ns = S.db.notas.filter(n => n.contatoId === id);
+  abrirModal(`${cab(esc(c.nome))}<div class="det-linha">Telefone <b>${esc(c.telefone || '—')}</b></div>${c.obs ? `<div class="alerta info" style="white-space:pre-wrap">${esc(c.obs)}</div>` : ''}
+    <div class="linha-btns col" style="margin:12px 0">${c.telefone ? `<a class="btn wa" href="${waLink(c.telefone)}" target="_blank" rel="noopener">Abrir WhatsApp</a>` : ''}
+    <button class="btn" data-a="novo" data-contato="${id}" data-tipo="mensagem">+ Lembrete “mandar mensagem”</button></div>
+    ${its.length ? `<div class="grupo-dia">Lembretes pendentes</div>${lista(its, { mostrarData: true })}` : ''}
+    ${ns.length ? `<div class="grupo-dia">Notas</div>${ns.map(n => `<div class="linha" data-a="verNota" data-id="${n.id}" style="cursor:pointer;padding:6px 0">📝 ${esc(n.titulo || 'Sem título')}</div>`).join('')}` : ''}
+    <div class="linha-btns" style="margin-top:12px"><button class="btn" style="flex:1" data-a="editarContato" data-id="${id}">Editar</button><button class="btn" style="flex:1" data-a="novaNota" data-contato="${id}">+ Nota</button></div>`);
+}
+function formProjeto(p) {
+  const novo = !p; p = p || { status: 'andamento' };
+  abrirModal(`${cab(novo ? 'Novo projeto / usina' : 'Editar projeto')}<form data-form="projeto" data-id="${novo ? '' : p.id}">
+    <label class="campo">Nome<input name="nome" required value="${esc(p.nome || '')}" placeholder="Ex.: Usina Fazenda Boa Vista 75 kWp" autofocus></label>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Situação</span>${chips('status', { andamento: 'Em andamento', concluido: 'Concluído' }, p.status)}</div>
+    <label class="campo">Observações<textarea name="obs" rows="4">${esc(p.obs || '')}</textarea></label>
+    <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${novo ? '' : `<button class="btn perigo" type="button" data-a="excluirProjeto" data-id="${p.id}">Excluir</button>`}</div></form>`);
+}
+function formGasto(g) {
+  const novo = !g; g = g || { repeticao: 'unico', aba: S.aba === 'trabalho' ? 'trabalho' : 'pessoal', data: '', soMes: false };
+  const its = S.db.itens.filter(i => !i.feito || i.id === g.itemId).sort((a, b) => (a.titulo || '').localeCompare(b.titulo || '')).map(i => [i.id, i.titulo + (i.data ? ' (' + fdm(i.data) + ')' : '')]);
+  abrirModal(`${cab(novo ? 'Novo gasto previsto' : 'Editar gasto')}<form data-form="gasto" data-id="${novo ? '' : g.id}">
+    <label class="campo">Nome<input name="nome" required value="${esc(g.nome || '')}" placeholder="Ex.: IPVA, presente da mãe, inscrição da prova" autofocus></label>
+    <label class="campo">Valor estimado (opcional)<input name="valor" type="number" step="0.01" min="0" inputmode="decimal" value="${g.valor ?? ''}" placeholder="R$"></label>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Quando</span>${chips('quando', { data: 'Data exata', mes: 'Só o mês' }, g.soMes ? 'mes' : 'data')}</div>
+    <label class="campo" data-q="data">Data<input type="date" name="data" value="${g.soMes ? '' : (g.data || '')}"></label>
+    <label class="campo oculto" data-q="mes">Mês<input type="month" name="mes" value="${g.data ? g.data.slice(0, 7) : ''}"></label>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Repetição</span>${chips('repeticao', REPS_G, g.repeticao || 'unico')}</div>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Área</span>${chips('aba', { pessoal: 'Pessoal', trabalho: 'Trabalho' }, g.aba || 'pessoal')}</div>
+    <label class="campo">Ligar a uma tarefa ou prazo<select name="itemId">${opcoesSel(its, g.itemId)}</select></label>
+    <label class="campo">Observação<textarea name="obs" rows="2">${esc(g.obs || '')}</textarea></label>
+    <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${novo ? '' : `<button class="btn perigo" type="button" data-a="excluirGasto" data-id="${g.id}">Excluir</button>`}</div></form>`);
+  ajustarFormGasto();
+}
+function ajustarFormGasto() {
+  const f = document.querySelector('form[data-form=gasto]'); if (!f) return;
+  const q = f.querySelector('input[name=quando]:checked').value;
+  f.querySelectorAll('[data-q]').forEach(el => el.classList.toggle('oculto', el.dataset.q !== q));
+}
+function verGasto(id) {
+  const g = S.db.gastos.find(x => x.id === id); if (!g) return;
+  const prox = ocorrenciasGastos(addDias(hoje(), -60), addMeses(hoje(), 13), true).filter(o => o.g.id === id).slice(0, 6);
+  const it = S.db.itens.find(i => i.id === g.itemId);
+  abrirModal(`${cab('💰 ' + esc(g.nome))}
+    <div class="det-linha">Valor estimado <b>${g.valor ? brl(g.valor) : '—'}</b></div><div class="det-linha">Repetição <b>${REPS_G[g.repeticao || 'unico']}</b></div>
+    <div class="det-linha">Área <b>${g.aba === 'trabalho' ? 'Trabalho' : 'Pessoal'}</b></div>
+    ${it ? `<div class="det-linha">Ligado a <b><a href="#" data-a="verItem" data-id="${it.id}">${esc(it.titulo)}</a></b></div>` : ''}
+    ${g.obs ? `<div class="alerta info" style="white-space:pre-wrap">${esc(g.obs)}</div>` : ''}
+    <div class="grupo-dia" style="margin-top:12px">Ocorrências</div>
+    ${prox.map(o => `<div class="check-linha ${o.pago ? 'ok' : ''}"><span class="txt">${rotuloGasto(o)}${o.pago ? ' — pago ' + brl(o.real) : ''}</span>${o.pago ? `<button class="btn peq" data-a="desfazerPago" data-id="${id}" data-d="${o.d}">Desfazer</button>` : `<button class="btn ok peq" data-a="pagar" data-id="${id}" data-d="${o.d}">Marcar pago</button>`}</div>`).join('') || '<div class="vazio">Sem ocorrências próximas.</div>'}
+    <div class="linha-btns" style="margin-top:14px"><button class="btn" style="flex:1" data-a="editarGasto" data-id="${id}">Editar</button><button class="btn perigo" data-a="excluirGasto" data-id="${id}">Excluir</button></div>`);
+}
+function pagar(id, d) {
+  const g = S.db.gastos.find(x => x.id === id);
+  abrirModal(`${cab('Marcar como pago')}<p style="margin-top:0">${esc(g.nome)} · ${g.soMes ? nomeMes(mesDe(d)) : fdata(d)}</p>
+    <form data-form="pagar" data-id="${id}" data-d="${d}"><label class="campo">Valor real pago<input name="v" type="number" step="0.01" min="0" inputmode="decimal" required value="${g.valor ?? ''}" autofocus></label>
+    ${g.valor ? `<p class="vazio">Estimado: ${brl(g.valor)}</p>` : ''}<button class="btn pri bloco" type="submit">Confirmar pagamento</button></form>`);
+}
+
+/* ===================== Ações (cliques) ===================== */
+const ACOES = {
+  fechar: () => fecharModal(),
+  aba: el => { S.aba = el.dataset.v; ls.set('ag_aba', S.aba); render(); },
+  ir: el => { S.view = el.dataset.v; fecharModal(); render(); scrollTo(0, 0); },
+  tema: () => { const atual = document.documentElement.dataset.tema; ls.set('ag_tema', atual === 'escuro' ? 'claro' : 'escuro'); aplicarTema(); render(); },
+  temaSet: el => { ls.set('ag_tema', el.dataset.v); aplicarTema(); render(); },
+  novo: el => {
+    const v = S.view;
+    if (el.classList.contains('fab')) {
+      if (v === 'notas') return formNota(); if (v === 'contatos') return formContato(); if (v === 'projetos') return formProjeto();
+      if (v === 'gastos') return formGasto(); if (v === 'metas') return novaMeta();
+      if (v === 'projeto') return formItem(null, { projeto: S.tmp.projetoId });
+      if (v === 'agenda') return formItem(null, { dia: S.cal.sel });
+    }
+    formItem(null, { dia: el.dataset.dia, projeto: el.dataset.projeto, contato: el.dataset.contato, tipo: el.dataset.tipo });
+  },
+  feito: el => { const it = S.db.itens.find(x => x.id === el.dataset.id); marcarFeito(it.id, !it.feito); },
+  feitoFechar: el => { fecharModal(); marcarFeito(el.dataset.id, true); },
+  desfeito: el => { fecharModal(); marcarFeito(el.dataset.id, false); },
+  verItem: el => verItem(el.dataset.id),
+  editarItem: el => formItem(S.db.itens.find(x => x.id === el.dataset.id)),
+  excluirItem: el => { if (confirm('Excluir este item?')) { excluir('itens', el.dataset.id); fecharModal(); } },
+  chk: el => { const it = S.db.itens.find(x => x.id === el.dataset.id); const cl = it.checklist.map((c, i) => i === +el.dataset.i ? { ...c, ok: el.checked } : c); salvar('itens', { ...it, checklist: cl }, true); el.closest('.check-linha').classList.toggle('ok', el.checked); render(); },
+  adiar: el => adiar(el.dataset.id),
+  adiarPara: el => aplicarAdiar(el.dataset.id, el.dataset.v),
+  naoConsegui: el => naoConsegui(el.dataset.id),
+  moverPara: el => { const it = S.db.itens.find(x => x.id === el.dataset.id); const h = { ...it, historico: [...(it.historico || [])] }; moverOuPlanejarNC(h, el.dataset.v); fecharModal(); render(); toast(`Movido para ${frel(el.dataset.v)}.`); },
+  aplicarDivisao: el => aplicarDivisao(el.dataset.id),
+  revisao: () => { S.view = 'revisao'; fecharModal(); render(); scrollTo(0, 0); },
+  replanejarTudo: () => previaLote(pendentesRevisao(), addDias(hoje(), 1), 'Replanejar pendentes', 'Cada item vai para o primeiro dia a partir de amanhã que tem espaço, sem passar do prazo.'),
+  encaixar: () => previaLote(itensVis().filter(it => !it.feito && (it.tipo === 'tarefa' || it.tipo === 'prazo') && num(it.horas) > 0 && !it.planejado && (!it.data || it.data >= hoje())), hoje(), 'Planejar automaticamente', 'Cada tarefa vai para o primeiro dia a partir de hoje com espaço livre, antes do prazo.'),
+  aplicarLote: () => aplicarLote(),
+  diaPlan: (el, e) => { e.preventDefault(); diaPlan(el.dataset.v); },
+  horasDia: el => horasDia(el.dataset.v),
+  removerExc: el => { const a = AJ(); const ex = { ...a.excecoes }; delete ex[el.dataset.v]; salvar('ajustes', { ...a, excecoes: ex }); fecharModal(); toast('Dia voltou ao padrão.'); },
+  calNav: el => { const n = +el.dataset.v; S.cal.ref = S.cal.modo === 'mes' ? addMeses(S.cal.ref.slice(0, 7) + '-01', n) : addDias(S.cal.ref, 7 * n); S.cal.sel = S.cal.modo === 'mes' ? (mesDe(hoje()) === mesDe(S.cal.ref) ? hoje() : S.cal.ref) : segundaDe(S.cal.ref); render(); },
+  calModo: el => { S.cal.modo = el.dataset.v; S.cal.ref = S.cal.sel; render(); },
+  calHoje: () => { S.cal.ref = hoje(); S.cal.sel = hoje(); render(); },
+  calSel: el => { S.cal.sel = el.dataset.v; if (S.cal.modo === 'mes' && mesDe(el.dataset.v) !== mesDe(S.cal.ref)) S.cal.ref = el.dataset.v; render(); },
+  semNav: el => { S.semanaRef = addDias(S.semanaRef, +el.dataset.v); render(); },
+  novaMeta: () => novaMeta(),
+  addAssunto: () => $('#assuntos').insertAdjacentHTML('beforeend', linhaAssunto()),
+  remAssunto: el => el.closest('.assunto-linha').remove(),
+  confirmarMeta: () => confirmarMeta(),
+  redistMeta: el => redistMeta(el.dataset.id),
+  excluirMeta: el => { if (!confirm('Excluir a meta e as sessões de estudo ainda não feitas?')) return; excluir('itens', S.db.itens.filter(i => i.metaId === el.dataset.id && !i.feito).map(i => i.id)); excluir('metas', el.dataset.id); },
+  novaNota: el => formNota(null, { dia: el.dataset.dia, projeto: el.dataset.projeto, contato: el.dataset.contato }),
+  verNota: el => verNota(el.dataset.id),
+  editarNota: el => formNota(S.db.notas.find(x => x.id === el.dataset.id)),
+  excluirNota: el => { if (confirm('Excluir esta nota?')) { excluir('notas', el.dataset.id); fecharModal(); } },
+  novoContato: () => formContato(),
+  verContato: el => verContato(el.dataset.id),
+  editarContato: el => formContato(contato(el.dataset.id)),
+  excluirContato: el => { if (confirm('Excluir este contato?')) { excluir('contatos', el.dataset.id); fecharModal(); } },
+  novoProjeto: () => formProjeto(),
+  verProjeto: el => { S.tmp.projetoId = el.dataset.id; S.view = 'projeto'; render(); scrollTo(0, 0); },
+  abrirProjeto: (el, e) => { e.preventDefault(); fecharModal(); S.tmp.projetoId = el.dataset.id; S.view = 'projeto'; render(); },
+  editarProjeto: el => formProjeto(projeto(el.dataset.id)),
+  excluirProjeto: el => { if (confirm('Excluir o projeto? (as tarefas e notas continuam, só perdem o vínculo)')) { excluir('projetos', el.dataset.id); fecharModal(); S.view = 'projetos'; render(); } },
+  novoGasto: () => formGasto(),
+  verGasto: (el, e) => { e.preventDefault(); verGasto(el.dataset.id); },
+  editarGasto: el => formGasto(S.db.gastos.find(x => x.id === el.dataset.id)),
+  excluirGasto: el => { if (confirm('Excluir este gasto previsto?')) { excluir('gastos', el.dataset.id); fecharModal(); } },
+  pagar: el => pagar(el.dataset.id, el.dataset.d),
+  desfazerPago: el => { const g = S.db.gastos.find(x => x.id === el.dataset.id); const pg = { ...(g.pagamentos || {}) }; delete pg[el.dataset.d]; salvar('gastos', { ...g, pagamentos: pg }); fecharModal(); },
+  rolarMes: el => document.getElementById('mes-' + el.dataset.v)?.scrollIntoView({ behavior: 'smooth' }),
+  backup: () => { const b = new Blob([JSON.stringify({ exportado: new Date().toISOString(), ...S.db }, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `agenda-backup-${hoje()}.json`; a.click(); },
+  sair: () => { if (confirm('Sair deste aparelho? Vai precisar digitar o código de novo.')) sair(); }
+};
+function moverOuPlanejarNC(it, d) {
+  if ((it.tipo === 'tarefa' || it.tipo === 'prazo') && it.data && d <= it.data) {
+    salvar('itens', { ...it, planejado: d === it.data ? null : d, historico: [...(it.historico || []), { de: dia(it), para: d, em: hoje(), tipo: 'nao-consegui' }], adiamentos: (it.adiamentos || 0) + 1 }, true);
+  } else moverItem(it, d, 'nao-consegui');
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  if (el.tagName === 'INPUT' && el.type === 'checkbox') { ACOES[el.dataset.a]?.(el, e); return; }
+  if (el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href') !== '#') return; // links normais (WhatsApp)
+  if (el.tagName === 'A') e.preventDefault();
+  ACOES[el.dataset.a]?.(el, e);
+});
+document.addEventListener('change', e => {
+  if (e.target.closest('form[data-form=item]') && (e.target.name === 'tipo' || e.target.name === 'area')) ajustarFormItem();
+  if (e.target.closest('form[data-form=gasto]') && e.target.name === 'quando') ajustarFormGasto();
+});
+document.addEventListener('input', e => {
+  const k = e.target.dataset?.busca; if (!k) return;
+  S.busca[k] = e.target.value; const pos = e.target.selectionStart; render();
+  const novo = document.querySelector(`[data-busca=${k}]`); if (novo) { novo.focus(); try { novo.setSelectionRange(pos, pos); } catch {} }
+});
+
+/* ===================== Formulários (envio) ===================== */
+const FORMS = {
+  item: f => salvarFormItem(f),
+  adiarData: f => { const d = dadosForm(f).d; if (d) aplicarAdiar(f.dataset.id, d); },
+  horasReais: f => { const it = S.db.itens.find(x => x.id === f.dataset.id); salvar('itens', { ...it, horasReais: num(dadosForm(f).h) }); toast('Horas salvas'); verItem(it.id); },
+  horas: f => { const d = dadosForm(f); const a = AJ(); salvar('ajustes', { ...a, semana: DSEM.map((_, i) => num(d['d' + i])), folga: Math.min(80, Math.max(0, num(d.folga))) }); toast('Horas salvas'); },
+  horasDia: f => { const a = AJ(); salvar('ajustes', { ...a, excecoes: { ...a.excecoes, [f.dataset.v]: num(dadosForm(f).h) } }); fecharModal(); toast('Horas do dia ajustadas'); },
+  meta: f => previaMeta(f),
+  nota: f => { const d = dadosForm(f); const id = f.dataset.id; const ant = id ? S.db.notas.find(x => x.id === id) : null; salvar('notas', { ...(ant || { id: uid(), criado: new Date().toISOString() }), titulo: d.titulo.trim(), texto: d.texto, data: d.data || hoje(), aba: d.aba, projetoId: d.projetoId || null, contatoId: d.contatoId || null, dia: d.dia || null }); fecharModal(); toast('Nota salva'); },
+  contato: f => { const d = dadosForm(f); const id = f.dataset.id; const ant = id ? contato(id) : null; salvar('contatos', { ...(ant || { id: uid() }), nome: d.nome.trim(), telefone: d.telefone.trim(), aba: d.aba, obs: d.obs }); fecharModal(); toast('Contato salvo'); },
+  projeto: f => { const d = dadosForm(f); const id = f.dataset.id; const ant = id ? projeto(id) : null; salvar('projetos', { ...(ant || { id: uid(), criado: new Date().toISOString() }), nome: d.nome.trim(), status: d.status, obs: d.obs, aba: 'trabalho' }); fecharModal(); toast('Projeto salvo'); },
+  gasto: f => {
+    const d = dadosForm(f); const id = f.dataset.id; const ant = id ? S.db.gastos.find(x => x.id === id) : null;
+    const soMes = d.quando === 'mes'; const data = soMes ? (d.mes ? d.mes + '-01' : '') : d.data;
+    if (!data) { toast('Informe a data ou o mês.'); return; }
+    salvar('gastos', { ...(ant || { id: uid(), pagamentos: {} }), nome: d.nome.trim(), valor: d.valor === '' ? null : num(d.valor), data, soMes, repeticao: d.repeticao, aba: d.aba, itemId: d.itemId || null, obs: d.obs });
+    fecharModal(); toast('Gasto salvo');
+  },
+  pagar: f => { const g = S.db.gastos.find(x => x.id === f.dataset.id); salvar('gastos', { ...g, pagamentos: { ...(g.pagamentos || {}), [f.dataset.d]: { valor: num(dadosForm(f).v), em: hoje() } } }); fecharModal(); toast('Marcado como pago'); },
+  codigo: async f => {
+    const d = dadosForm(f); if (d.novo !== d.novo2) return toast('Os novos códigos não são iguais.');
+    try { await rpc('app_definir_codigo', { p_novo: d.novo, p_atual: d.atual }); S.codigo = d.novo.trim(); if (ls.get('ag_codigo')) ls.set('ag_codigo', S.codigo); else ss.set('ag_codigo', S.codigo); f.reset(); toast('Código trocado!'); }
+    catch (e) { toast({ invalido: 'Código atual incorreto.', codigo_curto: 'Use pelo menos 6 caracteres.', bloqueado: 'Muitas tentativas. Espere 10 min.' }[e.codigo] || 'Erro ao trocar o código.'); }
+  }
+};
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]'); if (!f) return; e.preventDefault(); FORMS[f.dataset.form]?.(f);
+});
+
+// Atualiza a tela à meia-noite / ao voltar para o app
+let ultimoDia = hoje();
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible' || !S.codigo) return;
+  if (!fila.length) { try { await carregar(); } catch {} }
+  if (hoje() !== ultimoDia) { ultimoDia = hoje(); S.cal.sel = hoje(); S.cal.ref = hoje(); }
+  if ($('#modal').classList.contains('oculto')) render();
+});
+
+iniciar();
+</script>
+</body>
+</html>
