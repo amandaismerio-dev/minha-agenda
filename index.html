@@ -207,6 +207,29 @@ table.tab th{color:var(--txt2);font-size:.78rem;text-transform:uppercase}
 .lista-sel .linha small{color:var(--txt2);display:block}
 .nota-txt{white-space:pre-wrap;color:var(--txt2);font-size:.9rem;margin-top:3px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .assunto-linha{display:grid;grid-template-columns:1fr 90px 44px;gap:8px;margin-bottom:8px}
+.bloco-dia{border:1px solid var(--linha);border-radius:12px;padding:10px 12px 0;margin-bottom:8px}
+.bd-nome{font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.bd-res{background:var(--verde-claro);color:var(--verde);font-size:.85rem;padding:2px 10px;border-radius:999px}
+.bd-campos{display:grid;grid-template-columns:1.15fr 1.15fr .8fr;gap:8px;align-items:end}
+.bd-campos .campo{margin-bottom:10px;font-size:.8rem}
+.bd-campos input{padding:9px 8px!important;min-height:42px!important}
+.postit{background:#fff4a3;color:#3d3300;border-radius:4px 4px 14px 4px;padding:14px 16px 10px;margin-bottom:14px;box-shadow:0 2px 0 rgba(0,0,0,.06),0 8px 18px rgba(120,100,0,.15);position:relative}
+:root[data-tema="escuro"] .postit{background:#3b3512;color:#fff1a6;box-shadow:none}
+.postit::before{content:"";position:absolute;top:-7px;left:50%;width:70px;height:16px;transform:translateX(-50%) rotate(-2deg);background:rgba(255,255,255,.55);border-radius:2px}
+:root[data-tema="escuro"] .postit::before{background:rgba(255,255,255,.12)}
+.postit h3{margin:0 0 8px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.postit .pl{display:flex;gap:12px;padding:5px 6px;border-radius:8px;align-items:baseline}
+.postit .pl .ph{font-weight:800;min-width:48px;font-variant-numeric:tabular-nums}
+.postit .pl.passou{opacity:.5}
+.postit .pl.agora{background:rgba(0,0,0,.08);font-weight:700}
+:root[data-tema="escuro"] .postit .pl.agora{background:rgba(255,255,255,.12)}
+.postit .pl.agora .ph::after{content:" ● agora";font-size:.7rem;color:#c2410c;font-weight:700;white-space:nowrap}
+.postit .pbtn{border:0;background:rgba(0,0,0,.08);color:inherit;border-radius:10px;padding:7px 12px;font-weight:700;cursor:pointer;font-size:.85rem;min-height:36px}
+:root[data-tema="escuro"] .postit .pbtn{background:rgba(255,255,255,.12)}
+#agora{position:fixed;left:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:21;background:#fff4a3;color:#3d3300;border:0;border-radius:12px;padding:9px 13px;font-weight:700;font-size:.85rem;box-shadow:0 4px 14px rgba(0,0,0,.18);max-width:calc(100vw - 110px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;text-align:left}
+:root[data-tema="escuro"] #agora{background:#3b3512;color:#fff1a6}
+@media (min-width:900px){#agora{left:216px;bottom:28px}}
+.rot-linha{display:grid;grid-template-columns:124px 1fr 44px;gap:8px;margin-bottom:8px}
 #toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:12px;z-index:60;font-size:.92rem;box-shadow:0 6px 18px rgba(0,0,0,.3);max-width:90vw;text-align:center}
 #sync{font-size:.75rem;color:var(--txt2)}
 .mais-grade{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -261,6 +284,7 @@ table.tab th{color:var(--txt2);font-size:.78rem;text-transform:uppercase}
   </nav>
   <main id="main"></main>
   <button class="fab" data-a="novo" aria-label="Adicionar">+</button>
+  <button id="agora" class="oculto" data-a="verRoteiro"></button>
 </div>
 
 <div id="modal" class="oculto"><div class="folha" id="folha"></div></div>
@@ -552,7 +576,7 @@ function barraDia(s, carga) {
   const pw = (c.pessoal / max) * 100, tw = (c.trabalho / max) * 100;
   const marca = cheio ? `<i class="marca" style="left:${(disp / max) * 100}%"></i>` : '';
   return `<div class="barra-wrap"><div class="barra ${cheio ? 'cheia' : ''}"><span class="seg-pessoal" style="width:${pw}%"></span><span class="seg-trabalho" style="width:${tw}%"></span>${marca}</div>
-    <div class="barra-txt"><span class="${cheio ? 'over' : ''}">${fh(c.t)} planejadas de ${fh(disp)}${cheio ? ' — passou ' + fh(c.t - disp) : ''}</span><span>${livres ? fh(livres) + ' livres − ' + num(AJ().folga) + '% folga' : 'dia sem horas livres'}</span></div></div>`;
+    <div class="barra-txt"><span class="${cheio ? 'over' : ''}">${fh(c.t)} planejadas de ${fh(disp)}${cheio ? ' — passou ' + fh(c.t - disp) : ''}</span><span>${livres ? fh(livres) + ' livres' + (num(AJ().folga) ? ' − ' + num(AJ().folga) + '% reserva' : '') : 'dia sem horas livres'}</span></div></div>`;
 }
 
 /* ===================== Gastos previstos ===================== */
@@ -582,6 +606,7 @@ function render() {
   document.querySelector('meta[name=theme-color]').content = cor || '#7c3aed';
   const V = VIEWS[S.view] || VIEWS.inicio;
   $('#main').innerHTML = V();
+  atualizarAgora();
 }
 const nomeAba = () => ({ pessoal: 'Pessoal', trabalho: 'Trabalho', tudo: 'Tudo' }[S.aba]);
 
@@ -611,6 +636,45 @@ function cardItem(it, o = {}) {
 const ordenar = arr => arr.sort((a, b) => (dia(a) || '9').localeCompare(dia(b) || '9') || (a.hora || '99').localeCompare(b.hora || '99') || (PESO_PRIO[a.prioridade] ?? 1) - (PESO_PRIO[b.prioridade] ?? 1));
 const lista = (arr, o) => arr.length ? arr.map(it => cardItem(it, o)).join('') : `<div class="vazio">${o?.vazio || 'Nada por aqui.'}</div>`;
 
+/* ---------- Roteiro do dia (post-it) ---------- */
+const agoraHM = () => { const n = new Date(); return pad(n.getHours()) + ':' + pad(n.getMinutes()); };
+function roteiro(d) {
+  const a = AJ(); const r = (a.rotinaDia || {})[d] ?? (a.rotina || {})[dsem(d)] ?? [];
+  return r.filter(x => x.h && x.t).slice().sort((x, y) => x.h.localeCompare(y.h));
+}
+const roteiroProprio = d => (AJ().rotinaDia || {})[d] != null;
+function idxAgora(r) { const n = agoraHM(); let k = -1; r.forEach((x, i) => { if (x.h <= n) k = i; }); return k; }
+function postitHtml(d) {
+  const r = roteiro(d); const ehHoje = d === hoje(); const k = ehHoje ? idxAgora(r) : -2;
+  const tit = ehHoje ? 'Meu roteiro de hoje' : 'Roteiro de ' + fdia(d);
+  if (!r.length) return `<div class="postit"><h3>🗒 ${tit}</h3><div style="font-size:.92rem;margin-bottom:8px">Monte o seu dia hora a hora (ex.: 7h acordar, 8h trabalho, 12h almoço, 18h estudo). Ele fica aqui para você lembrar.</div><button class="pbtn" data-a="editarRoteiro" data-v="${d}">+ Montar roteiro</button></div>`;
+  return `<div class="postit"><h3>🗒 ${tit}${roteiroProprio(d) ? ' <small style="font-weight:600;opacity:.7">(só deste dia)</small>' : ''}</h3>
+    ${r.map((x, i) => `<div class="pl ${ehHoje && i < k ? 'passou' : ''} ${i === k ? 'agora' : ''}"><span class="ph">${x.h.replace(':00', 'h').replace(':', 'h')}</span><span>${esc(x.t)}</span></div>`).join('')}
+    <div style="margin-top:8px"><button class="pbtn" data-a="editarRoteiro" data-v="${d}">Editar roteiro</button></div></div>`;
+}
+function atualizarAgora() {
+  const el = $('#agora'); if (!el) return;
+  const r = roteiro(hoje()); const k = idxAgora(r);
+  if (!r.length || k < 0) { el.classList.add('oculto'); return; }
+  const prox = r[k + 1];
+  el.textContent = `🗒 Agora: ${r[k].t}${prox ? ' · ' + prox.h.replace(':00', 'h').replace(':', 'h') + ' ' + prox.t : ''}`;
+  el.classList.remove('oculto');
+}
+function linhaRot(x = {}) { return `<div class="rot-linha"><input class="inp" type="time" name="rh" value="${x.h || ''}" style="margin:0"><input class="inp" name="rt" value="${esc(x.t || '')}" placeholder="O que fazer" style="margin:0"><button type="button" class="icone-btn" data-a="remRot" style="height:46px;width:44px" aria-label="Remover">✕</button></div>`; }
+function editarRoteiro(d, base) {
+  const r = base || roteiro(d); const nomeDs = DSEM_LONGO[dsem(d)].toLowerCase();
+  const linhas = r.length ? r : [{ h: '07:00', t: 'Acordar' }, { h: '08:00', t: 'Trabalho' }, { h: '12:00', t: 'Almoço' }, { h: '13:00', t: '' }, { h: '18:00', t: 'Estudo' }];
+  abrirModal(`${cab('🗒 Roteiro — ' + fdia(d))}
+  <form data-form="roteiro" data-v="${d}">
+    <p class="vazio" style="margin-top:-4px">Coloque o horário e o que vai fazer. A linha vale até o próximo horário.</p>
+    <div id="rot-linhas">${linhas.map(linhaRot).join('')}</div>
+    <div class="linha-btns" style="margin-bottom:12px"><button type="button" class="btn peq" data-a="addRot">+ Horário</button>
+      <select class="inp" data-copiar="${d}" style="width:auto;flex:1;min-height:36px;padding:6px 10px;margin:0"><option value="">Copiar de outro dia…</option>${DSEM_LONGO.map((n, i) => `<option value="${i}">${n}</option>`).join('')}</select></div>
+    <div class="campo"><span style="font-size:.88rem;font-weight:600;color:var(--txt2)">Usar este roteiro</span>${chips('alcance', { semana: 'Toda ' + nomeDs, dia: 'Só neste dia (' + fdm(d) + ')' }, roteiroProprio(d) ? 'dia' : 'semana')}</div>
+    <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${roteiroProprio(d) ? `<button type="button" class="btn" data-a="rotPadrao" data-v="${d}">Voltar ao de toda ${nomeDs}</button>` : ''}</div>
+  </form>`);
+}
+
 const VIEWS = {};
 
 /* ---------- Avisos (tela inicial) ---------- */
@@ -635,6 +699,7 @@ VIEWS.inicio = () => {
   const c = cargaMapa(h, h);
 
   let html = `<h2 class="tit">Avisos <span class="sub">${DSEM_LONGO[dsem(h)]}, ${fdata(h)} · ${nomeAba()}</span> <span id="sync" style="margin-left:auto"></span></h2>`;
+  html += postitHtml(h);
   if (antec.length || g30.length) {
     html += `<div class="card secao-aviso"><h3>⚠ Avisos antecipados</h3>`;
     html += antec.map(it => `<div class="alerta amar" data-a="verItem" data-id="${it.id}" style="cursor:pointer;margin:6px 0"><b>${esc(it.titulo)}</b> — prazo em ${diff(h, it.data)} dia(s) (${fdia(it.data)})</div>`).join('');
@@ -718,7 +783,7 @@ VIEWS.agenda = () => {
     <div style="margin-top:8px">${xs.length ? xs.map(x => cardItem(x.it, { virtual: x.virtual, mostrarData: x.prazoAqui })).join('') : '<div class="vazio">Nenhum item neste dia.</div>'}</div>
     ${gs.map(o => `<div class="alerta amar" data-a="verGasto" data-id="${o.g.id}" style="cursor:pointer">💰 ${esc(o.g.nome)} ${o.valor ? '— ' + brl(o.valor) : ''}${o.pago ? ' (pago)' : ''}</div>`).join('')}
     <div class="linha-btns" style="margin-top:10px"><button class="btn peq pri" data-a="novo" data-dia="${sel}">+ Adicionar neste dia</button><button class="btn peq" data-a="novaNota" data-dia="${sel}">+ Nota do dia</button><button class="btn peq" data-a="horasDia" data-v="${sel}">Horas deste dia</button></div>
-    ${notasDoDia(sel)}</div>`;
+    ${notasDoDia(sel)}</div>${postitHtml(sel)}`;
   return html;
 };
 function barraMini(d, carga) {
@@ -844,11 +909,12 @@ VIEWS.gastos = () => {
 VIEWS.ajustes = () => {
   const a = AJ(); const t = ls.get('ag_tema') || 'auto';
   return `<h2 class="tit">Ajustes</h2>
-  <div class="card"><h3>Horas livres por dia da semana</h3>
-    <form data-form="horas"><div class="campos2" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))">${DSEM_LONGO.map((d, i) => `<label class="campo">${d}<input type="number" step="0.5" min="0" max="24" name="d${i}" value="${a.semana[i]}"></label>`).join('')}</div>
-    <label class="campo">Folga para imprevistos (%)<input type="number" min="0" max="80" step="5" name="folga" value="${a.folga}"></label>
-    <button class="btn pri" type="submit">Salvar horas</button></form>
-    <p class="vazio" style="margin-top:10px">Para mudar só um dia específico (feriado, viagem), abra o dia na Agenda ou no Planejador e toque em “Horas deste dia”.</p>
+  <div class="card"><h3>Meu dia a dia</h3>
+    <p class="vazio" style="margin-top:-4px">Para cada dia, diga a que horas acorda, a que horas dorme e quantas horas já estão ocupadas (aula, trabalho, refeições, deslocamento…). O sistema calcula sozinho as <b>horas livres para tarefas</b>.</p>
+    <form data-form="horas" data-calc>${DSEM_LONGO.map((d, i) => blocoDia('d' + i, detDia(i), d)).join('')}
+    <label class="campo" style="margin-top:12px">Reserva para imprevistos (%) — deixe 0 se não quiser reserva<input type="number" min="0" max="80" step="5" name="folga" value="${a.folga}"></label>
+    <button class="btn pri bloco" type="submit">Salvar meus horários</button></form>
+    <p class="vazio" style="margin-top:10px">Para mudar só um dia específico (feriado, viagem, dia de prova), abra o dia na Agenda e toque em “Horas deste dia”.</p>
     ${excecoesHtml()}</div>
   <div class="card"><h3>Aparência</h3><div class="seg" style="display:inline-flex">${['auto', 'claro', 'escuro'].map(v => `<button class="${t === v ? 'ativo' : ''}" data-a="temaSet" data-v="${v}">${{ auto: 'Automático', claro: 'Claro', escuro: 'Escuro' }[v]}</button>`).join('')}</div></div>
   <div class="card"><h3>Código de acesso</h3>
@@ -862,7 +928,7 @@ VIEWS.ajustes = () => {
 function excecoesHtml() {
   const a = AJ(); const ex = Object.entries(a.excecoes).filter(([d]) => d >= hoje()).sort();
   if (!ex.length) return '';
-  return `<div class="grupo-dia" style="margin-top:14px">Dias ajustados</div>` + ex.map(([d, h]) => `<div class="check-linha"><span class="txt">${fdia(d)}/${d.slice(0, 4)} — ${fh(h)} livres</span><button class="btn peq" data-a="removerExc" data-v="${d}">Remover</button></div>`).join('');
+  return `<div class="grupo-dia" style="margin-top:14px">Dias ajustados</div>` + ex.map(([d, h]) => `<div class="check-linha"><span class="txt">${fdia(d)}/${d.slice(0, 4)} — ${fh(h)} livres (só nesse dia)</span><button class="btn peq" data-a="removerExc" data-v="${d}">Remover</button></div>`).join('');
 }
 </script>
 <script>
@@ -1113,7 +1179,7 @@ VIEWS.planejador = () => {
   <div class="kpi"><div class="v" style="color:${pend ? 'var(--verm)' : 'inherit'}">${pend}</div><div class="l">pendente(s) de hoje/atrás</div></div></div>
   <div class="linha-btns" style="margin-bottom:14px"><button class="btn pri" data-a="revisao">Revisão do dia</button><button class="btn" data-a="novaMeta">🎯 Meta para prova</button><button class="btn" data-a="ir" data-v="resumo">Resumo da semana</button><button class="btn" data-a="ir" data-v="ajustes">Minhas horas</button></div>`;
   if (estourados.length) html += `<div class="alerta verm">Dias com mais do que cabe: ${estourados.map(d => `<a href="#" data-a="diaPlan" data-v="${d}">${fdia(d)}</a>`).join(', ')}. Toque no dia e use “Não consegui” nos itens de menor prioridade.</div>`;
-  html += `<div class="card"><h3>Próximos 14 dias <span class="cont">${AJ().folga}% de folga</span></h3>`;
+  html += `<div class="card"><h3>Próximos 14 dias ${num(AJ().folga) ? `<span class="cont">${AJ().folga}% de reserva</span>` : ''}</h3>`;
   for (let d = h; d <= fim; d = addDias(d, 1)) {
     const cheio = (carga[d]?.t || 0) > disponivel(d) + 1e-9;
     html += `<div class="dia-plan ${d === h ? 'hoje' : ''} ${cheio ? 'excedido' : ''}" data-a="diaPlan" data-v="${d}"><div class="dn">${d === h ? 'Hoje' : DSEM[dsem(d)]}<small>${fdm(d)}</small></div><div>${barraDia(d, carga)}</div></div>`;
@@ -1132,10 +1198,36 @@ function diaPlan(d) {
 }
 function horasDia(d) {
   const a = AJ(); const temExc = a.excecoes[d] != null;
-  abrirModal(`${cab('Horas livres em ' + fdia(d))}
-  <form data-form="horasDia" data-v="${d}"><label class="campo">Horas livres neste dia (padrão de ${DSEM_LONGO[dsem(d)].toLowerCase()}: ${fh(a.semana[dsem(d)])})<input type="number" step="0.5" min="0" max="24" name="h" value="${horasLivres(d)}" required></label>
-  <p class="vazio">Descontando ${a.folga}% de folga, sobram ${fh(disponivel(d))} para planejar.</p>
-  <div class="linha-btns"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${temExc ? `<button class="btn" type="button" data-a="removerExc" data-v="${d}">Voltar ao padrão</button>` : ''}</div></form>`);
+  const det = (a.excDetalhe || {})[d] || (temExc ? { acordo: '07:00', durmo: '22:00', ocupado: Math.max(0, 15 - num(a.excecoes[d])) } : detDia(dsem(d)));
+  abrirModal(`${cab('Horas de ' + fdia(d))}
+  <form data-form="horasDia" data-v="${d}" data-calc>
+  <p class="vazio" style="margin-top:-4px">Só para este dia. O padrão de ${DSEM_LONGO[dsem(d)].toLowerCase()} é ${fh(a.semana[dsem(d)])} livres.</p>
+  ${blocoDia('x', det, DSEM_LONGO[dsem(d)] + ' ' + fdm(d))}
+  ${num(a.folga) ? `<p class="vazio">Com a reserva de ${a.folga}% para imprevistos, o planejador usa um pouco menos que isso.</p>` : ''}
+  <div class="linha-btns" style="margin-top:12px"><button class="btn pri" type="submit" style="flex:1">Salvar</button>${temExc ? `<button class="btn" type="button" data-a="removerExc" data-v="${d}">Voltar ao padrão</button>` : ''}</div></form>`);
+}
+const minutos = t => { if (!t) return null; const [hh, mm] = t.split(':').map(Number); return hh * 60 + (mm || 0); };
+function calcLivres(acordo, durmo, ocupado) {
+  const a = minutos(acordo), b = minutos(durmo); if (a == null || b == null) return 0;
+  let dur = (b - a) / 60; if (dur <= 0) dur += 24; // dormir depois da meia-noite
+  return Math.max(0, Math.round((dur - num(ocupado)) * 4) / 4);
+}
+function detDia(i) {
+  const a = AJ(); const d = (a.detalhe || [])[i];
+  if (d) return d;
+  return { acordo: '07:00', durmo: '22:00', ocupado: Math.max(0, 15 - num(a.semana[i])) }; // equivale às horas já salvas
+}
+function blocoDia(p, det, nome) {
+  const liv = calcLivres(det.acordo, det.durmo, det.ocupado);
+  return `<div class="bloco-dia" data-bloco="${p}"><div class="bd-nome">${nome}<span class="bd-res" data-res="${p}">${fh(liv)} livres</span></div>
+    <div class="bd-campos"><label class="campo">Acordo<input type="time" name="${p}_a" value="${det.acordo}"></label>
+    <label class="campo">Durmo<input type="time" name="${p}_d" value="${det.durmo}"></label>
+    <label class="campo">Ocupado (horas)<input type="number" step="0.5" min="0" max="24" name="${p}_o" value="${det.ocupado}" inputmode="decimal"></label></div></div>`;
+}
+function lerBloco(dados, p) { const det = { acordo: dados[p + '_a'] || '07:00', durmo: dados[p + '_d'] || '22:00', ocupado: num(dados[p + '_o']) }; return { det, livres: calcLivres(det.acordo, det.durmo, det.ocupado) }; }
+function atualizarCalc(f) {
+  const d = dadosForm(f);
+  f.querySelectorAll('[data-res]').forEach(el => { const r = lerBloco(d, el.dataset.res); el.textContent = fh(r.livres) + ' livres'; });
 }
 
 /* ---------- Meta para prova ---------- */
@@ -1355,6 +1447,11 @@ function pagar(id, d) {
 /* ===================== Ações (cliques) ===================== */
 const ACOES = {
   fechar: () => fecharModal(),
+  verRoteiro: () => abrirModal(cab('Meu dia') + postitHtml(hoje())),
+  editarRoteiro: el => editarRoteiro(el.dataset.v),
+  addRot: () => $('#rot-linhas').insertAdjacentHTML('beforeend', linhaRot()),
+  remRot: el => el.closest('.rot-linha').remove(),
+  rotPadrao: el => { const a = AJ(); const rd = { ...(a.rotinaDia || {}) }; delete rd[el.dataset.v]; salvar('ajustes', { ...a, rotinaDia: rd }); fecharModal(); toast('Voltou ao roteiro padrão.'); },
   aba: el => { S.aba = el.dataset.v; ls.set('ag_aba', S.aba); render(); },
   ir: el => { S.view = el.dataset.v; fecharModal(); render(); scrollTo(0, 0); },
   tema: () => { const atual = document.documentElement.dataset.tema; ls.set('ag_tema', atual === 'escuro' ? 'claro' : 'escuro'); aplicarTema(); render(); },
@@ -1387,7 +1484,7 @@ const ACOES = {
   aplicarLote: () => aplicarLote(),
   diaPlan: (el, e) => { e.preventDefault(); diaPlan(el.dataset.v); },
   horasDia: el => horasDia(el.dataset.v),
-  removerExc: el => { const a = AJ(); const ex = { ...a.excecoes }; delete ex[el.dataset.v]; salvar('ajustes', { ...a, excecoes: ex }); fecharModal(); toast('Dia voltou ao padrão.'); },
+  removerExc: el => { const a = AJ(); const ex = { ...a.excecoes }; delete ex[el.dataset.v]; const exd = { ...(a.excDetalhe || {}) }; delete exd[el.dataset.v]; salvar('ajustes', { ...a, excecoes: ex, excDetalhe: exd }); fecharModal(); toast('Dia voltou ao padrão.'); },
   calNav: el => { const n = +el.dataset.v; S.cal.ref = S.cal.modo === 'mes' ? addMeses(S.cal.ref.slice(0, 7) + '-01', n) : addDias(S.cal.ref, 7 * n); S.cal.sel = S.cal.modo === 'mes' ? (mesDe(hoje()) === mesDe(S.cal.ref) ? hoje() : S.cal.ref) : segundaDe(S.cal.ref); render(); },
   calModo: el => { S.cal.modo = el.dataset.v; S.cal.ref = S.cal.sel; render(); },
   calHoje: () => { S.cal.ref = hoje(); S.cal.sel = hoje(); render(); },
@@ -1437,8 +1534,10 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   if (e.target.closest('form[data-form=item]') && (e.target.name === 'tipo' || e.target.name === 'area')) ajustarFormItem();
   if (e.target.closest('form[data-form=gasto]') && e.target.name === 'quando') ajustarFormGasto();
+  if (e.target.dataset?.copiar && e.target.value !== '') { const a = AJ(); const r = ((a.rotina || {})[e.target.value] || []); if (!r.length) { toast('Esse dia ainda não tem roteiro.'); e.target.value = ''; return; } $('#rot-linhas').innerHTML = r.map(linhaRot).join(''); toast('Copiado de ' + DSEM_LONGO[e.target.value].toLowerCase()); e.target.value = ''; }
 });
 document.addEventListener('input', e => {
+  const fc = e.target.closest?.('form[data-calc]'); if (fc) { atualizarCalc(fc); return; }
   const k = e.target.dataset?.busca; if (!k) return;
   S.busca[k] = e.target.value; const pos = e.target.selectionStart; render();
   const novo = document.querySelector(`[data-busca=${k}]`); if (novo) { novo.focus(); try { novo.setSelectionRange(pos, pos); } catch {} }
@@ -1449,9 +1548,17 @@ const FORMS = {
   item: f => salvarFormItem(f),
   adiarData: f => { const d = dadosForm(f).d; if (d) aplicarAdiar(f.dataset.id, d); },
   horasReais: f => { const it = S.db.itens.find(x => x.id === f.dataset.id); salvar('itens', { ...it, horasReais: num(dadosForm(f).h) }); toast('Horas salvas'); verItem(it.id); },
-  horas: f => { const d = dadosForm(f); const a = AJ(); salvar('ajustes', { ...a, semana: DSEM.map((_, i) => num(d['d' + i])), folga: Math.min(80, Math.max(0, num(d.folga))) }); toast('Horas salvas'); },
-  horasDia: f => { const a = AJ(); salvar('ajustes', { ...a, excecoes: { ...a.excecoes, [f.dataset.v]: num(dadosForm(f).h) } }); fecharModal(); toast('Horas do dia ajustadas'); },
+  horas: f => { const d = dadosForm(f); const a = AJ(); const bl = DSEM.map((_, i) => lerBloco(d, 'd' + i)); salvar('ajustes', { ...a, semana: bl.map(b => b.livres), detalhe: bl.map(b => b.det), folga: Math.min(80, Math.max(0, num(d.folga))) }); toast('Horários salvos!'); },
+  horasDia: f => { const a = AJ(); const r = lerBloco(dadosForm(f), 'x'); salvar('ajustes', { ...a, excecoes: { ...a.excecoes, [f.dataset.v]: r.livres }, excDetalhe: { ...(a.excDetalhe || {}), [f.dataset.v]: r.det } }); fecharModal(); toast(`Salvo: ${fh(r.livres)} livres neste dia`); },
   meta: f => previaMeta(f),
+  roteiro: f => {
+    const d = f.dataset.v; const hs = [...f.querySelectorAll('[name=rh]')].map(x => x.value); const ts = [...f.querySelectorAll('[name=rt]')].map(x => x.value.trim());
+    const r = hs.map((hh, i) => ({ h: hh, t: ts[i] })).filter(x => x.h && x.t).sort((a, b) => a.h.localeCompare(b.h));
+    const a = AJ(); const alc = dadosForm(f).alcance;
+    if (alc === 'dia') salvar('ajustes', { ...a, rotinaDia: { ...(a.rotinaDia || {}), [d]: r } });
+    else { const rd = { ...(a.rotinaDia || {}) }; delete rd[d]; salvar('ajustes', { ...a, rotina: { ...(a.rotina || {}), [dsem(d)]: r }, rotinaDia: rd }); }
+    fecharModal(); toast(alc === 'dia' ? 'Roteiro salvo para ' + fdm(d) : 'Roteiro salvo para toda ' + DSEM_LONGO[dsem(d)].toLowerCase());
+  },
   nota: f => { const d = dadosForm(f); const id = f.dataset.id; const ant = id ? S.db.notas.find(x => x.id === id) : null; salvar('notas', { ...(ant || { id: uid(), criado: new Date().toISOString() }), titulo: d.titulo.trim(), texto: d.texto, data: d.data || hoje(), aba: d.aba, projetoId: d.projetoId || null, contatoId: d.contatoId || null, dia: d.dia || null }); fecharModal(); toast('Nota salva'); },
   contato: f => { const d = dadosForm(f); const id = f.dataset.id; const ant = id ? contato(id) : null; salvar('contatos', { ...(ant || { id: uid() }), nome: d.nome.trim(), telefone: d.telefone.trim(), aba: d.aba, obs: d.obs }); fecharModal(); toast('Contato salvo'); },
   projeto: f => { const d = dadosForm(f); const id = f.dataset.id; const ant = id ? projeto(id) : null; salvar('projetos', { ...(ant || { id: uid(), criado: new Date().toISOString() }), nome: d.nome.trim(), status: d.status, obs: d.obs, aba: 'trabalho' }); fecharModal(); toast('Projeto salvo'); },
@@ -1482,6 +1589,10 @@ document.addEventListener('visibilitychange', async () => {
   if ($('#modal').classList.contains('oculto')) render();
 });
 
+setInterval(() => {
+  if (!S.codigo) return; atualizarAgora();
+  if (S.view === 'inicio' && $('#modal').classList.contains('oculto') && !document.activeElement?.matches?.('input,textarea,select')) render();
+}, 60000);
 iniciar();
 </script>
 </body>
