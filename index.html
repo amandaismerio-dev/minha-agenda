@@ -299,7 +299,9 @@ table.tab th{color:var(--txt2);font-size:.78rem;text-transform:uppercase}
    ===================================================================== */
 const CONFIG = {
   SUPABASE_URL: 'https://gczedrtmorahvtfsrrki.supabase.co',
-  SUPABASE_KEY: 'sb_publishable_8DavIjm6E2egTz0qtxuQRQ_f-WFPOXo'
+  SUPABASE_KEY: 'sb_publishable_8DavIjm6E2egTz0qtxuQRQ_f-WFPOXo',
+  // chave PÚBLICA das notificações (a privada fica só no banco)
+  PUSH_KEY: 'BG4IDOwJU_ishP1Pu3vAc0nkiVLFgzO3OIblDrSnTSP8NQ_PFUUUrJRFKTC76JBKSsok0bHWWhx-q9r5pAwn9vc'
 };
 
 /* ===================== Utilidades ===================== */
@@ -449,7 +451,15 @@ $('#form-login').addEventListener('submit', async e => {
     err.textContent = m[ex.codigo] || 'Sem conexão. Tente de novo.';
   } finally { btn.disabled = false; }
 });
+async function manterPush() {
+  try {
+    if (!pushSuportado() || Notification.permission !== 'granted' || location.protocol !== 'https:') return;
+    const reg = await regSW(); const sub = await reg.pushManager.getSubscription();
+    if (sub) { await rpc('app_push_inscrever', { p_codigo: S.codigo, p_sub: sub.toJSON(), p_aparelho: navigator.userAgent.slice(0, 180) }); ls.set('ag_push', '1'); }
+  } catch {}
+}
 function abrirApp() {
+  manterPush();
   $('#login').classList.add('oculto'); $('#app').classList.remove('oculto');
   $('#inp-codigo').value = '';
   render();
@@ -606,6 +616,7 @@ function render() {
   document.querySelector('meta[name=theme-color]').content = cor || '#7c3aed';
   const V = VIEWS[S.view] || VIEWS.inicio;
   $('#main').innerHTML = V();
+  if (S.view === 'ajustes') atualizarPushStatus();
   atualizarAgora();
 }
 const nomeAba = () => ({ pessoal: 'Pessoal', trabalho: 'Trabalho', tudo: 'Tudo' }[S.aba]);
@@ -635,6 +646,49 @@ function cardItem(it, o = {}) {
 }
 const ordenar = arr => arr.sort((a, b) => (dia(a) || '9').localeCompare(dia(b) || '9') || (a.hora || '99').localeCompare(b.hora || '99') || (PESO_PRIO[a.prioridade] ?? 1) - (PESO_PRIO[b.prioridade] ?? 1));
 const lista = (arr, o) => arr.length ? arr.map(it => cardItem(it, o)).join('') : `<div class="vazio">${o?.vazio || 'Nada por aqui.'}</div>`;
+
+/* ---------- Notificações (Web Push) ---------- */
+const pushSuportado = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushAtivo = () => pushSuportado() && Notification.permission === 'granted' && ls.get('ag_push') === '1';
+function chaveU8(b64) { const p = '='.repeat((4 - b64.length % 4) % 4); const s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...s].map(c => c.charCodeAt(0))); }
+async function regSW() { return navigator.serviceWorker.register('sw.js'); }
+async function inscricaoAtual() { if (!pushSuportado()) return null; const r = await navigator.serviceWorker.getRegistration(); return r ? r.pushManager.getSubscription() : null; }
+async function atualizarPushStatus() {
+  const st = $('#push-status'), bt = $('#push-btns'); if (!st) return;
+  if (!pushSuportado()) { st.className = 'alerta amar'; st.textContent = 'Este navegador não aceita notificações. No Android, abra o site pelo Chrome (não pelo navegador de dentro do WhatsApp/Instagram).'; bt.innerHTML = ''; return; }
+  if (location.protocol !== 'https:') { st.className = 'alerta amar'; st.textContent = 'As notificações só funcionam no site publicado (https).'; bt.innerHTML = ''; return; }
+  if (Notification.permission === 'denied') { st.className = 'alerta verm'; st.innerHTML = 'As notificações foram <b>bloqueadas</b> para este site. No Chrome: toque no cadeado ao lado do endereço → Permissões → Notificações → Permitir. Depois volte aqui.'; bt.innerHTML = ''; return; }
+  const sub = await inscricaoAtual().catch(() => null);
+  if (sub && Notification.permission === 'granted') {
+    st.className = 'alerta verde'; st.textContent = '✓ Ativadas neste aparelho.';
+    bt.innerHTML = `<button class="btn pri" data-a="testarPush">Enviar notificação de teste</button><button class="btn" data-a="desativarPush">Desativar</button>`;
+  } else {
+    st.className = 'alerta info'; st.textContent = 'Desativadas neste aparelho.';
+    bt.innerHTML = `<button class="btn pri" data-a="ativarPush">Ativar notificações</button>`;
+  }
+}
+async function ativarPush() {
+  try {
+    if (!pushSuportado()) return toast('Este navegador não aceita notificações. Use o Chrome.');
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') { toast('Permissão não concedida.'); return atualizarPushStatus(); }
+    const reg = await regSW(); await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveU8(CONFIG.PUSH_KEY) });
+    await rpc('app_push_inscrever', { p_codigo: S.codigo, p_sub: sub.toJSON(), p_aparelho: navigator.userAgent.slice(0, 180) });
+    ls.set('ag_push', '1'); toast('Notificações ativadas! 🔔'); atualizarPushStatus();
+  } catch (e) { console.error(e); toast('Não consegui ativar: ' + (e.message || e)); }
+}
+async function testarPush() {
+  const sub = await inscricaoAtual(); if (!sub) return ativarPush();
+  try { const r = await rpc('app_push_testar', { p_codigo: S.codigo, p_endpoint: sub.endpoint }); if (!r.inscrito) { await rpc('app_push_inscrever', { p_codigo: S.codigo, p_sub: sub.toJSON(), p_aparelho: navigator.userAgent.slice(0, 180) }); await rpc('app_push_testar', { p_codigo: S.codigo, p_endpoint: sub.endpoint }); } toast('Pronto! A notificação de teste chega em até 1 minuto.', 4000); }
+  catch { toast('Sem conexão. Tente de novo.'); }
+}
+async function desativarPush() {
+  const sub = await inscricaoAtual();
+  if (sub) { try { await rpc('app_push_remover', { p_codigo: S.codigo, p_endpoint: sub.endpoint }); } catch {} await sub.unsubscribe().catch(() => {}); }
+  ls.del('ag_push'); toast('Notificações desativadas neste aparelho.'); atualizarPushStatus();
+}
 
 /* ---------- Roteiro do dia (post-it) ---------- */
 const agoraHM = () => { const n = new Date(); return pad(n.getHours()) + ':' + pad(n.getMinutes()); };
@@ -916,6 +970,10 @@ VIEWS.ajustes = () => {
     <button class="btn pri bloco" type="submit">Salvar meus horários</button></form>
     <p class="vazio" style="margin-top:10px">Para mudar só um dia específico (feriado, viagem, dia de prova), abra o dia na Agenda e toque em “Horas deste dia”.</p>
     ${excecoesHtml()}</div>
+  <div class="card"><h3>🔔 Notificações no celular</h3>
+    <p class="vazio" style="margin-top:-4px">Recebe um aviso no horário das tarefas que têm hora marcada, mesmo com o site fechado. Ative em cada aparelho (use o Chrome).</p>
+    <div id="push-status" class="alerta info">Verificando…</div>
+    <div class="linha-btns" id="push-btns"></div></div>
   <div class="card"><h3>Aparência</h3><div class="seg" style="display:inline-flex">${['auto', 'claro', 'escuro'].map(v => `<button class="${t === v ? 'ativo' : ''}" data-a="temaSet" data-v="${v}">${{ auto: 'Automático', claro: 'Claro', escuro: 'Escuro' }[v]}</button>`).join('')}</div></div>
   <div class="card"><h3>Código de acesso</h3>
     <form data-form="codigo"><label class="campo">Código atual<input type="password" name="atual" required></label>
@@ -959,6 +1017,8 @@ function formItem(it, pre = {}) {
       <label class="campo"><span data-rot="data">Data</span><input type="date" name="data" value="${it.data || ''}"></label>
       <label class="campo">Hora (opcional)<input type="time" name="hora" value="${it.hora || ''}"></label>
     </div>
+    <label class="campo">🔔 Aviso no celular (precisa ter hora)<select name="avisoMin">${[[0, 'Na hora'], [10, '10 min antes'], [30, '30 min antes'], [60, '1 hora antes'], [-1, 'Não avisar']].map(([v, n]) => `<option value="${v}" ${+(it.avisoMin ?? 0) === v ? 'selected' : ''}>${n}</option>`).join('')}</select>
+      ${pushAtivo() ? '' : '<small style="font-weight:500">As notificações ainda não estão ativas neste aparelho — ative em Mais → Ajustes.</small>'}</label>
     <div class="campos2" data-so="tarefa prazo compromisso">
       <label class="campo" data-so="tarefa prazo">Fazer em (dia planejado)<input type="date" name="planejado" value="${it.planejado || ''}"></label>
       <label class="campo">Tempo estimado (horas)<input type="number" step="0.25" min="0" name="horas" value="${it.horas ?? ''}" placeholder="Ex.: 1,5"></label>
@@ -996,6 +1056,7 @@ function salvarFormItem(f) {
     data: d.data || null, hora: d.hora || null,
     planejado: (d.tipo === 'tarefa' || d.tipo === 'prazo') ? (d.planejado || null) : null,
     horas: d.tipo === 'mensagem' ? 0 : num(d.horas),
+    avisoMin: num(d.avisoMin),
     repeticao: d.repeticao, avisoAntes: (d.tipo === 'prazo' || d.tipo === 'tarefa') ? +d.avisoAntes : 0,
     contatoId: d.contatoId || null, mensagem: d.tipo === 'mensagem' ? d.mensagem : (antigo?.mensagem || ''),
     projetoId: d.area === 'trabalho' ? (d.projetoId || null) : null,
@@ -1018,6 +1079,7 @@ function verItem(id) {
     ${L('Fazer em', it.planejado ? fdia(it.planejado) : '')}
     ${L('Área', AREAS[it.area])}
     ${L('Tempo estimado', num(it.horas) ? fh(it.horas) : '')}
+    ${L('Aviso no celular', it.hora ? ({ 0: 'na hora', 10: '10 min antes', 30: '30 min antes', 60: '1 hora antes', '-1': 'desligado' }[it.avisoMin ?? 0] || 'na hora') : '')}
     ${L('Repetição', it.repeticao && it.repeticao !== 'nenhuma' ? REPS[it.repeticao] : '')}
     ${L('Aviso', num(it.avisoAntes) ? it.avisoAntes + ' dia(s) antes' : '')}
     ${L('Projeto', p ? `<a href="#" data-a="abrirProjeto" data-id="${p.id}">${esc(p.nome)}</a>` : '')}
@@ -1447,6 +1509,9 @@ function pagar(id, d) {
 /* ===================== Ações (cliques) ===================== */
 const ACOES = {
   fechar: () => fecharModal(),
+  ativarPush: () => ativarPush(),
+  testarPush: () => testarPush(),
+  desativarPush: () => desativarPush(),
   verRoteiro: () => abrirModal(cab('Meu dia') + postitHtml(hoje())),
   editarRoteiro: el => editarRoteiro(el.dataset.v),
   addRot: () => $('#rot-linhas').insertAdjacentHTML('beforeend', linhaRot()),
